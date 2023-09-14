@@ -4,4 +4,7 @@
 fixtures:
   forge_modules:
      stdlib: "puppetlabs/stdlib"
+     docker: "puppetlabs/docker"
+     apt: "puppetlabs/apt"
      dockerapp: "ffquintella/dockerapp"
+

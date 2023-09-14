@@ -241,7 +241,7 @@ class {"dockerapp":
   if $website_ssl_cert_pwd == '' { fail('website_ssl_cert_pwd is mandatory') }
 
   #API CONFIGS
-  $envs = [
+  $envs_api = [
     "FACTER_ENABLE_SAML=${enable_saml}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
@@ -268,9 +268,27 @@ class {"dockerapp":
   }
 
 
-  $volumes_api = [
-    "${conf_configdir}/certs/api.pfx:/netrisk/api.pfx",
-  ]
+  $network_name = "${service_name}-net"
+
+  if $enable_api == true {
+
+    $api_service_name = "${service_name}_api"
+
+    $api_ports = ["${api_port}:5443"]
+
+    $volumes_api = [
+      "${conf_configdir}/api/certs/api.pfx:/netrisk/api.pfx",
+    ]
+
+    dockerapp::run { $api_service_name:
+      image        => $image_name_api,
+      ports        => $api_ports,
+      volumes      => $volumes_api,
+      environments => $envs_api,
+      net          => $network_name,
+      require      => [File["${conf_configdir_api}/certs/api.pfx"]],
+    }
+  }
 
 
   #WEBSITE CONFIGS
