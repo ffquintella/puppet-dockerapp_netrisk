@@ -277,7 +277,7 @@ class {"dockerapp":
     $api_ports = ["${api_port}:5443"]
 
     $volumes_api = [
-      "${conf_configdir}/api/certs/api.pfx:/netrisk/api.pfx",
+      "${conf_configdir_api}/certs/api.pfx:/netrisk/api.pfx",
     ]
 
     dockerapp::run { $api_service_name:
@@ -302,10 +302,41 @@ class {"dockerapp":
     source => $website_ssl_cert_file,
   }
 
-
-  $volumes_website = [
-    "${conf_configdir}/certs/website.pfx:/netrisk/website.pfx",
+  $envs_website = [
+    "FACTER_DBSERVER=${db_server}",
+    "FACTER_DBUSER=${db_user}",
+    "FACTER_DBPORT=${db_port}",
+    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBSCHEMA=${db_schema}",
+    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_SERVER_LOGGING=${logging}",
+    "FACTER_EMAIL_FROM=${email_from}",
+    "FACTER_EMAIL_SERVER=${email_server}",
+    "FACTER_EMAIL_PORT=${email_port}",
+    "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
+    "FACTER_WEBSITE_HOST=${website_server}",
+    "FACTER_WEBSITE_PORT=${website_port}",
   ]
-  
+
+
+  if $enable_website == true {
+
+    $website_service_name = "${service_name}_website"
+
+    $website_ports = ["${website_port}:5443"]
+
+    $volumes_website = [
+      "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",
+    ]
+
+    dockerapp::run { $website_service_name:
+      image        => $image_name_website,
+      ports        => $website_ports,
+      volumes      => $volumes_website,
+      environments => $envs_website,
+      net          => $network_name,
+      require      => [File["${conf_configdir_website}/certs/website.pfx"]],
+    }
+  }
     
 }
