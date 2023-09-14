@@ -81,4 +81,42 @@ class {"dockerapp":
       }
     }
 
+    if ! defined(File[$conf_configdir]) {
+      file{ $conf_configdir:
+        ensure  => directory,
+        require => File[$base_app_config],
+      }
+    }
+    if ! defined(File[$conf_configdir_website]) {
+      file{ $conf_configdir_website:
+        ensure  => directory,
+        owner   => 33,
+        group   => 33,
+        require => File[$conf_configdir],
+      }
+    } 
+    if ! defined(File[$conf_configdir_api]) {
+      file{ $conf_configdir_api:
+        ensure  => directory,
+        owner   => 33,
+        group   => 33,
+        require => File[$conf_configdir],
+      }
+    } 
+    if ! defined(File[$conf_configdir_configurations]) {
+      file{ $conf_configdir_configurations:
+        ensure  => directory,
+        owner   => 33,
+        group   => 33,
+        require => File[$conf_configdir],
+      }
+    } 
+    if ! defined(File[$conf_configdir_ssl]) {
+      file{ $conf_configdir_ssl:
+        ensure  => directory,
+        owner   => 33,
+        group   => 33,
+        require => File[$conf_configdir],
+      }
+    } 
 }

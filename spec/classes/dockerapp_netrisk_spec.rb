@@ -26,6 +26,11 @@ describe 'dockerapp_netrisk' do
       it { is_expected.to contain_file('/srv/application-data/nettest/backups') }
       it { is_expected.to contain_file('/srv/application-data/nettest/api') }
       it { is_expected.to contain_file('/srv/application-data/nettest/website') }
+      it { is_expected.to contain_file('/srv/application-config/nettest') }
+      it { is_expected.to contain_file('/srv/application-config/nettest/api') }
+      it { is_expected.to contain_file('/srv/application-config/nettest/configurations') }
+      it { is_expected.to contain_file('/srv/application-config/nettest/ssl') }
+      it { is_expected.to contain_file('/srv/application-config/nettest/website') }
 
     end
   end
