@@ -133,6 +133,7 @@ class {"dockerapp":
 
     $image_name_api = "ffquintella/netrisk-api:${version}"
     $image_name_website = "ffquintella/netrisk-website:${version}"
+    $image_name_console = "ffquintella/netrisk-console:${version}"
 
 
     if ! defined(File[$conf_homedir]) {
@@ -323,7 +324,7 @@ class {"dockerapp":
 
     $website_service_name = "${service_name}_website"
 
-    $website_ports = ["${website_port}:5443"]
+    $website_ports = ["${website_port}:6443"]
 
     $volumes_website = [
       "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",
@@ -336,6 +337,28 @@ class {"dockerapp":
       environments => $envs_website,
       net          => $network_name,
       require      => [File["${conf_configdir_website}/certs/website.pfx"]],
+    }
+  }
+
+  $envs_console = [
+    "FACTER_DBSERVER=${db_server}",
+    "FACTER_DBUSER=${db_user}",
+    "FACTER_DBPORT=${db_port}",
+    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBSCHEMA=${db_schema}",
+    "FACTER_SERVER_LOGGING=${logging}",
+  ]
+
+
+  if $enable_console == true {
+
+    $console_service_name = "${service_name}_console"
+
+
+    dockerapp::run { $console_service_name:
+      image        => $image_name_console,
+      environments => $envs_console,
+      net          => $network_name,
     }
   }
     

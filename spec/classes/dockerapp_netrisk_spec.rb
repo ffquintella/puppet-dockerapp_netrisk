@@ -178,6 +178,43 @@ describe 'dockerapp_netrisk' do
               ],
             )}
 
+          it { is_expected.to contain_dockerapp__run('nettest_website')
+            .with(
+              image: 'ffquintella/netrisk-website:1.4.1',
+              ports: ['443:6443'],
+              volumes: [
+                '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx'
+              ],
+              environments: [
+                "FACTER_DBSERVER=testedb",
+                "FACTER_DBUSER=netrisk",
+                "FACTER_DBPORT=3306",
+                "FACTER_DBPASSWORD=testepwd",
+                "FACTER_DBSCHEMA=netrisk",
+                "FACTER_NETRISK_URL=https//node1.test.com:5443",
+                "FACTER_SERVER_LOGGING=Information",
+                "FACTER_EMAIL_FROM=netrisk@mail.com",
+                "FACTER_EMAIL_SERVER=localhost",
+                "FACTER_EMAIL_PORT=25",
+                "FACTER_WEBSITE_PROTOCOL=https",
+                "FACTER_WEBSITE_HOST=node1.test.com",
+                "FACTER_WEBSITE_PORT=443",
+              ],
+            )}
+
+          it { is_expected.to contain_dockerapp__run('nettest_console')
+            .with(
+              image: 'ffquintella/netrisk-console:1.4.1',
+              environments: [
+                "FACTER_DBSERVER=testedb",
+                "FACTER_DBUSER=netrisk",
+                "FACTER_DBPORT=3306",
+                "FACTER_DBPASSWORD=testepwd",
+                "FACTER_DBSCHEMA=netrisk",
+                "FACTER_SERVER_LOGGING=Information",
+              ],
+            )}
+
         end
       end
     end
