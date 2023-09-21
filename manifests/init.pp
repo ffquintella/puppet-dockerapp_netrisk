@@ -101,14 +101,26 @@ class dockerapp_netrisk(
   $enable_website = true,
   $enable_console = true,
   $enable_saml = false
-) {
+) inherits dockerapp::params {
 
 include dockerapp::basedirs
-include dockerapp::params
 
-class {"dockerapp":
-  manage_docker => false
-}
+#include dockerapp::params
+
+  if !defined(Class["::dockerapp"]){
+    class {"::dockerapp":
+      manage_docker => false
+    }
+  }
+  
+  if !defined(Class['::docker']){
+    class {'::docker':
+      manage_service              => false,
+      use_upstream_package_source => false,
+      manage_package              => false,
+    }
+  }
+
 
     $base_app_config = $::dockerapp::params::config_dir
     $base_app_home = $::dockerapp::params::data_dir
