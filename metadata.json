@@ -2,9 +2,11 @@
   "name": "ffquintella-dockerapp_netrisk",
   "version": "0.1.2",
   "author": "Felipe F. Quintella",
-  "summary": "",
+  "summary": "This module will install Netrisk a risk management application using docker images.",
   "license": "GPL-3.0",
-  "source": "",
+  "source": "https://github.com/ffquintella/puppet-dockerapp_netrisk",
+  "project_page": "https://github.com/ffquintella/puppet-dockerapp_netrisk/wiki",
+  "issues_url": "https://github.com/ffquintella/puppet-dockerapp_netrisk/issues",
   "dependencies": [
     {
       "name": "ffquintella/dockerapp",
