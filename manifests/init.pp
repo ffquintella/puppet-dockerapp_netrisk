@@ -285,10 +285,6 @@ include dockerapp::basedirs
 
   docker_network { $network_name:
     ensure   => present,
-    driver   => 'overlay',
-    subnet   => '192.168.7.0/24',
-    gateway  => '192.168.7.1',
-    ip_range => '192.168.7.7/32',
   }
 
 
