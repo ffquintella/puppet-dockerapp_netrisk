@@ -108,13 +108,13 @@ include dockerapp::basedirs
 #include dockerapp::params
 
   if !defined(Class["::dockerapp"]){
-    class {"::dockerapp":
+    class {"dockerapp":
       manage_docker => false
     }
   }
 
   if !defined(Class['::docker']){
-    class {'::docker':
+    class {'docker':
       manage_service              => false,
       use_upstream_package_source => false,
       manage_package              => false,
@@ -161,7 +161,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_homedir],
       }
-    } 
+    }
     if ! defined(File[$conf_homedir_website]) {
       file{ $conf_homedir_website:
         ensure  => directory,
@@ -169,7 +169,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_homedir],
       }
-    } 
+    }
     if ! defined(File[$conf_homedir_api]) {
       file{ $conf_homedir_api:
         ensure  => directory,
@@ -192,7 +192,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_configdir],
       }
-    } 
+    }
     if ! defined(File[$conf_configdir_api]) {
       file{ $conf_configdir_api:
         ensure  => directory,
@@ -200,7 +200,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_configdir],
       }
-    } 
+    }
     if ! defined(File[$conf_configdir_configurations]) {
       file{ $conf_configdir_configurations:
         ensure  => directory,
@@ -208,7 +208,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_configdir],
       }
-    } 
+    }
     if ! defined(File[$conf_configdir_ssl]) {
       file{ $conf_configdir_ssl:
         ensure  => directory,
@@ -216,7 +216,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_configdir],
       }
-    } 
+    }
     if ! defined(File[$conf_scriptsdir]) {
       file{ $conf_scriptsdir:
         ensure  => directory,
@@ -236,7 +236,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_logsdir],
       }
-    } 
+    }
     if ! defined(File[$conf_logsdir_api]) {
       file{ $conf_logsdir_api:
         ensure  => directory,
@@ -244,7 +244,7 @@ include dockerapp::basedirs
         group   => 33,
         require => File[$conf_logsdir],
       }
-    } 
+    }
 
   if $db_server == '' { fail('db_server cannot be empty') }
   if $db_password == '' { fail('db_password is mandatory') }
@@ -382,5 +382,5 @@ include dockerapp::basedirs
       net          => $network_name,
     }
   }
-    
+
 }
