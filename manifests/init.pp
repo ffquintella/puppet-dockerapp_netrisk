@@ -76,6 +76,12 @@
 # @param enable_saml
 #   If we should use saml configs for login
 #
+# @param user
+#   The user used to run the processes
+#
+# @param uid
+#   The uid of the user used ot run the processes
+#
 # @example
 #   include dockerapp_netrisk
 class dockerapp_netrisk (
@@ -103,7 +109,9 @@ class dockerapp_netrisk (
   Boolean $enable_api = true,
   Boolean $enable_website = true,
   Boolean $enable_console = true,
-  Boolean $enable_saml = false
+  Boolean $enable_saml = false,
+  String $user = 'netrisk',
+  Integer $uid = 7070,
 ) {
   include dockerapp::params
   include dockerapp::basedirs
@@ -184,6 +192,16 @@ class dockerapp_netrisk (
       require => File[$base_app_config],
     }
   }
+
+  if !defined(User[$user]) {
+    user { $user:
+      home    => $conf_configdir,
+      shell   => '/bin/bash',
+      uid     => $uid,
+      require => File[$conf_configdir],
+    }
+  }
+
   if ! defined(File[$conf_configdir_website]) {
     file { $conf_configdir_website:
       ensure  => directory,
@@ -270,6 +288,8 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
+    "FACTER_USER=${user}",
+    "FACTER_UID=${uid}",
   ]
 
   file { "${conf_configdir_api}/certs":
@@ -332,6 +352,8 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
     "FACTER_ENABLE_SAML=${enable_saml}",
+    "FACTER_USER=${user}",
+    "FACTER_UID=${uid}",
   ]
 
   if $enable_website == true {
@@ -359,6 +381,8 @@ class dockerapp_netrisk (
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_SERVER_LOGGING=${logging}",
+    "FACTER_USER=${user}",
+    "FACTER_UID=${uid}",
   ]
 
   if $enable_console == true {

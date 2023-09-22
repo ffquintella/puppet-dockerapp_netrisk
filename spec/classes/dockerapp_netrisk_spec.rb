@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 describe 'dockerapp_netrisk' do
-
   let(:node) { 'node1.test.com' }
 
   test_on = {
@@ -15,12 +14,10 @@ describe 'dockerapp_netrisk' do
     ],
   }
 
-  on_supported_os(test_on).each do |os, os_facts|
-
-    let(:facts) { os_facts }
+  on_supported_os(test_on).each do |_os, os_facts1|
+    let(:facts) { os_facts1 }
 
     context 'without db_server' do
-      
       let(:params) do
         {
           service_name: 'nettest',
@@ -28,11 +25,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/db_server cannot be empty/)}
+      it { is_expected.to compile.and_raise_error(%r{db_server cannot be empty}) }
     end
 
     context 'without db_password' do
-      
       let(:params) do
         {
           service_name: 'nettest',
@@ -41,11 +37,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/db_password is mandatory/)}
+      it { is_expected.to compile.and_raise_error(%r{db_password is mandatory}) }
     end
 
     context 'without api_ssl_cert_file' do
-      
       let(:params) do
         {
           service_name: 'nettest',
@@ -55,11 +50,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/api_ssl_cert_file is mandatory/)}
+      it { is_expected.to compile.and_raise_error(%r{api_ssl_cert_file is mandatory}) }
     end
 
     context 'without api_ssl_cert_pwd' do
-      
       let(:params) do
         {
           service_name: 'nettest',
@@ -70,11 +64,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/api_ssl_cert_pwd is mandatory/)}
+      it { is_expected.to compile.and_raise_error(%r{api_ssl_cert_pwd is mandatory}) }
     end
 
     context 'without website_ssl_cert_file' do
-      
       let(:params) do
         {
           service_name: 'nettest',
@@ -86,11 +79,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/website_ssl_cert_file is mandatory/)}
+      it { is_expected.to compile.and_raise_error(%r{website_ssl_cert_file is mandatory}) }
     end
 
-      context 'without website_ssl_cert_pwd' do
-      
+    context 'without website_ssl_cert_pwd' do
       let(:params) do
         {
           service_name: 'nettest',
@@ -103,11 +95,10 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-      it { is_expected.to compile.and_raise_error(/website_ssl_cert_pwd is mandatory/)}
+      it { is_expected.to compile.and_raise_error(%r{website_ssl_cert_pwd is mandatory}) }
     end
 
     context 'working example' do
-    
       let(:params) do
         {
           service_name: 'nettest',
@@ -123,15 +114,14 @@ describe 'dockerapp_netrisk' do
         }
       end
 
-    
       on_supported_os.each do |os, os_facts|
         context "on #{os}" do
           let(:facts) { os_facts }
 
           it { is_expected.to compile.with_all_deps }
-          it { is_expected.to contain_class('dockerapp').with(
-            manage_docker: false
-            ) }
+          it {
+            is_expected.to contain_class('dockerapp').with(manage_docker: false)
+          }
 
           it { is_expected.to contain_file('/srv/application-data/nettest') }
           it { is_expected.to contain_file('/srv/application-data/nettest/backups') }
@@ -151,76 +141,93 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs/website.pfx') }
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs') }
 
+          it {
+            is_expected.to contain_User('netrisk').with(
+              home: '/netrisk',
+              uid: 7070,
+            )
+          }
+
           it { is_expected.to contain_Docker_network('nettest-net') }
 
-          it { is_expected.to contain_dockerapp__run('nettest_api')
-            .with(
-              image: 'ffquintella/netrisk-api:1.4.1',
-              ports: ['5443:5443'],
-              volumes: [
-                '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx'
-              ],
-              environments: [
-                "FACTER_ENABLE_SAML=false",
-                "FACTER_DBSERVER=testedb",
-                "FACTER_DBUSER=netrisk",
-                "FACTER_DBPORT=3306",
-                "FACTER_DBPASSWORD=testepwd",
-                "FACTER_DBSCHEMA=netrisk",
-                "FACTER_NETRISK_URL=https//node1.test.com:5443",
-                "FACTER_SERVER_LOGGING=Information",
-                "FACTER_EMAIL_FROM=netrisk@mail.com",
-                "FACTER_EMAIL_SERVER=localhost",
-                "FACTER_EMAIL_PORT=25",
-                "FACTER_SERVER_CERTIFICATE_FILE=/netrisk/api.pfx",
-                "FACTER_SERVER_CERTIFICATE_PWD=123",
-                "FACTER_WEBSITE_PROTOCOL=https",
-                "FACTER_WEBSITE_HOST=node1.test.com",
-                "FACTER_WEBSITE_PORT=443",
-              ],
-            )}
+          it {
+            is_expected.to contain_dockerapp__run('nettest_api')
+              .with(
+                image: 'ffquintella/netrisk-api:1.4.1',
+                ports: ['5443:5443'],
+                volumes: [
+                  '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx',
+                ],
+                environments: [
+                  'FACTER_ENABLE_SAML=false',
+                  'FACTER_DBSERVER=testedb',
+                  'FACTER_DBUSER=netrisk',
+                  'FACTER_DBPORT=3306',
+                  'FACTER_DBPASSWORD=testepwd',
+                  'FACTER_DBSCHEMA=netrisk',
+                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_SERVER_LOGGING=Information',
+                  'FACTER_EMAIL_FROM=netrisk@mail.com',
+                  'FACTER_EMAIL_SERVER=localhost',
+                  'FACTER_EMAIL_PORT=25',
+                  'FACTER_SERVER_CERTIFICATE_FILE=/netrisk/api.pfx',
+                  'FACTER_SERVER_CERTIFICATE_PWD=123',
+                  'FACTER_WEBSITE_PROTOCOL=https',
+                  'FACTER_WEBSITE_HOST=node1.test.com',
+                  'FACTER_WEBSITE_PORT=443',
+                  'FACTER_USER=netrisk',
+                  'FACTER_UID=7070',
+                ],
+              )
+          }
 
+          it {
+            is_expected.to contain_dockerapp__run('nettest_website')
+              .with(
+                image: 'ffquintella/netrisk-website:1.4.1',
+                ports: ['443:6443'],
+                volumes: [
+                  '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx',
+                ],
+                environments: [
+                  'FACTER_DBSERVER=testedb',
+                  'FACTER_DBUSER=netrisk',
+                  'FACTER_DBPORT=3306',
+                  'FACTER_DBPASSWORD=testepwd',
+                  'FACTER_DBSCHEMA=netrisk',
+                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_SERVER_LOGGING=Information',
+                  'FACTER_EMAIL_FROM=netrisk@mail.com',
+                  'FACTER_EMAIL_SERVER=localhost',
+                  'FACTER_EMAIL_PORT=25',
+                  'FACTER_SERVER_CERTIFICATE_FILE=/netrisk/website.pfx',
+                  'FACTER_SERVER_CERTIFICATE_PWD=1234',
+                  'FACTER_WEBSITE_PROTOCOL=https',
+                  'FACTER_WEBSITE_HOST=node1.test.com',
+                  'FACTER_WEBSITE_PORT=443',
+                  'FACTER_ENABLE_SAML=false',
+                  'FACTER_USER=netrisk',
+                  'FACTER_UID=7070',
+                ],
+              )
+          }
 
-          it { is_expected.to contain_dockerapp__run('nettest_website')
-            .with(
-              image: 'ffquintella/netrisk-website:1.4.1',
-              ports: ['443:6443'],
-              volumes: [
-                '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx'
-              ],
-              environments: [
-                "FACTER_DBSERVER=testedb",
-                "FACTER_DBUSER=netrisk",
-                "FACTER_DBPORT=3306",
-                "FACTER_DBPASSWORD=testepwd",
-                "FACTER_DBSCHEMA=netrisk",
-                "FACTER_NETRISK_URL=https//node1.test.com:5443",
-                "FACTER_SERVER_LOGGING=Information",
-                "FACTER_EMAIL_FROM=netrisk@mail.com",
-                "FACTER_EMAIL_SERVER=localhost",
-                "FACTER_EMAIL_PORT=25",
-                "FACTER_SERVER_CERTIFICATE_FILE=/netrisk/website.pfx",
-                "FACTER_SERVER_CERTIFICATE_PWD=1234",
-                "FACTER_WEBSITE_PROTOCOL=https",
-                "FACTER_WEBSITE_HOST=node1.test.com",
-                "FACTER_WEBSITE_PORT=443",
-                "FACTER_ENABLE_SAML=false"
-              ],
-            )}
-
-          it { is_expected.to contain_dockerapp__run('nettest_console')
-            .with(
-              image: 'ffquintella/netrisk-console:1.4.1',
-              environments: [
-                "FACTER_DBSERVER=testedb",
-                "FACTER_DBUSER=netrisk",
-                "FACTER_DBPORT=3306",
-                "FACTER_DBPASSWORD=testepwd",
-                "FACTER_DBSCHEMA=netrisk",
-                "FACTER_SERVER_LOGGING=Information",
-              ],
-            )}
-
+          it {
+            is_expected.to contain_dockerapp__run('nettest_console')
+              .with(
+                image: 'ffquintella/netrisk-console:1.4.1',
+                environments: [
+                  'FACTER_DBSERVER=testedb',
+                  'FACTER_DBUSER=netrisk',
+                  'FACTER_DBPORT=3306',
+                  'FACTER_DBPASSWORD=testepwd',
+                  'FACTER_DBSCHEMA=netrisk',
+                  'FACTER_SERVER_LOGGING=Information',
+                  'FACTER_USER=netrisk',
+                  'FACTER_UID=7070',
+                ],
+              )
+          }
         end
       end
     end
