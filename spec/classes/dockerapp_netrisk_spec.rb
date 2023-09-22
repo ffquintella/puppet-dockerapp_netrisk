@@ -119,7 +119,8 @@ describe 'dockerapp_netrisk' do
           api_ssl_cert_file: '/sslfile.pfx',
           api_ssl_cert_pwd: '123',
           website_ssl_cert_file: '/ws_sslfile.pfx',
-          website_ssl_cert_pwd: '1234'
+          website_ssl_cert_pwd: '1234',
+          enable_saml: false
 
         }
       end
@@ -161,7 +162,7 @@ describe 'dockerapp_netrisk' do
                 '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx'
               ],
               environments: [
-                'FACTER_ENABLE_SAML=false',
+                "FACTER_ENABLE_SAML=false",
                 "FACTER_DBSERVER=testedb",
                 "FACTER_DBUSER=netrisk",
                 "FACTER_DBPORT=3306",
@@ -172,11 +173,14 @@ describe 'dockerapp_netrisk' do
                 "FACTER_EMAIL_FROM=netrisk@mail.com",
                 "FACTER_EMAIL_SERVER=localhost",
                 "FACTER_EMAIL_PORT=25",
+                "FACTER_SERVER_CERTIFICATE_FILE=/sslfile.pfx",
+                "FACTER_SERVER_CERTIFICATE_PWD=123",
                 "FACTER_WEBSITE_PROTOCOL=https",
                 "FACTER_WEBSITE_HOST=node1.test.com",
                 "FACTER_WEBSITE_PORT=443",
               ],
             )}
+
 
           it { is_expected.to contain_dockerapp__run('nettest_website')
             .with(
@@ -196,9 +200,12 @@ describe 'dockerapp_netrisk' do
                 "FACTER_EMAIL_FROM=netrisk@mail.com",
                 "FACTER_EMAIL_SERVER=localhost",
                 "FACTER_EMAIL_PORT=25",
+                "FACTER_SERVER_CERTIFICATE_FILE=/ws_sslfile.pfx",
+                "FACTER_SERVER_CERTIFICATE_PWD=1234",
                 "FACTER_WEBSITE_PROTOCOL=https",
                 "FACTER_WEBSITE_HOST=node1.test.com",
                 "FACTER_WEBSITE_PORT=443",
+                "FACTER_ENABLE_SAML=false"
               ],
             )}
 

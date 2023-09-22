@@ -1,6 +1,6 @@
 {
   "name": "ffquintella-dockerapp_netrisk",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Felipe F. Quintella",
   "summary": "This module installs the netrisk risk management aplication using docker on your server",
   "summary": "This module will install Netrisk a risk management application using docker images.",

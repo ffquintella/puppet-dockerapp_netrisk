@@ -1,115 +1,118 @@
 # @summary This is the main class wich will make netrisk run with all components
-#
 # Makes netrisk run
 #
-# @parameters
-#
-# [*service_name*]
+# @param service_name
 #   The name of the service, directories and base containers
 #
-# [*version*]
+# @param version
 #   The version to be installed
 #
-# [*api_server*]
+# @param api_server
 #   The server from wich the api should be called
 #
-# [*api_protocol*]
+# @param api_protocol
 #   The protocol api will use [http or https (default)]
 #
-# [*api_port*]
+# @param api_port
 #   The port to use with the api
 #
-# [*website_server*]
+# @param website_server
 #   The server from wich the website should be called
 #
-# [*website_protocol*]
+# @param website_protocol
 #   The protocol website will use [http or https (default)]
 #
-# [*website_port*]
+# @param website_port
 #   The port to use with the website
 #
-# [*db_server*]
+# @param db_server
 #   The server running the dbms (only mariadb is supported as right now)
 #
-# [*db_port*]
+# @param db_port
 #   The port dbms is running
 #
-# [*db_schema*]
+# @param db_schema
 #   The schema used on the dbms
 #
-# [*db_user*]
+# @param db_user
 #   The user used on the dbms
 #
-# [*db_password*]
+# @param db_password
 #   The password used on the dbms
 #
-# [*ssl_cert_file*]
+# @param api_ssl_cert_file
 #   The certificate file path
 #
-# [*db_password*]
-#   The certificate file password
+# @param api_ssl_cert_pwd
+#   The password of the ssl file
 #
-# [*logging*]
+# @param website_ssl_cert_file
+#   The certificate file path for the website 
+#
+# @param website_ssl_cert_pwd
+#   The password of the ssl file fro the website
+#
+# @param logging
 #   The log level to be used on the application
 #
-# [*email_from*]
+# @param email_from
 #   The email from to use on sent messages
 #
-# [*email_server*]
+# @param email_server
 #   The smtp email server (no authentication is supported right now)
 #
-# [*email_port*]
+# @param email_port
 #   The smtp email port (no ssl is supported right now)
 #
-# [*enable_api*]
+# @param enable_api
 #   If disabled the api container will not be run
 #
-# [*enable_website*]
+# @param enable_website
 #   If disabled the website container will not be run
 #
-# [*enable_console*]
+# @param enable_console
 #   If disabled the console container will not be run
 #
-# [*enable_saml*]
+# @param enable_saml
 #   If we should use saml configs for login
 #
 # @example
 #   include dockerapp_netrisk
-class dockerapp_netrisk(
-  $service_name = 'netrisk',
-  $version = 'latest',
-  $api_server = $::fqdn,
-  $api_protocol = 'https',
-  $api_port = '5443',
-  $website_port = '443',
-  $website_protocol = 'https',
-  $website_server = $::fqdn,
-  $db_server = '',
-  $db_port = '3306',
-  $db_schema = 'netrisk',
-  $db_user = 'netrisk',
-  $db_password = '',
-  $api_ssl_cert_file = '',
-  $api_ssl_cert_pwd = '',
-  $website_ssl_cert_file = '',
-  $website_ssl_cert_pwd = '',
-  $logging = 'Information',
-  $email_from = 'netrisk@mail.com',
-  $email_server = 'localhost',
-  $email_port = 25,
-  $enable_api = true,
-  $enable_website = true,
-  $enable_console = true,
-  $enable_saml = false
-) inherits dockerapp::params {
+class dockerapp_netrisk (
+  String  $service_name = 'netrisk',
+  String  $version = 'latest',
+  String  $api_server = $::fqdn,
+  String  $api_protocol = 'https',
+  Integer $api_port = 5443,
+  Integer $website_port = 443,
+  String  $website_protocol = 'https',
+  String  $website_server = $::fqdn,
+  String  $db_server = '-',
+  Integer $db_port = 3306,
+  String  $db_schema = 'netrisk',
+  String  $db_user = 'netrisk',
+  String $db_password = '-',
+  String $api_ssl_cert_file = '-',
+  String $api_ssl_cert_pwd = '-',
+  String $website_ssl_cert_file = '-',
+  String $website_ssl_cert_pwd = '-',
+  String $logging = 'Information',
+  String $email_from = 'netrisk@mail.com',
+  String $email_server = 'localhost',
+  Integer $email_port = 25,
+  Boolean $enable_api = true,
+  Boolean $enable_website = true,
+  Boolean $enable_console = true,
+  Boolean $enable_saml = false
+) {
+  include dockerapp::params
+  include dockerapp::basedirs
 
-include dockerapp::basedirs
+  #include dockerapp::params
 
-#include dockerapp::params
-
-  if !defined(Class["::dockerapp"]){
-    class {"dockerapp":
-      manage_docker => false
+  if !defined(Class['dockerapp']){
+    class { 'dockerapp':
+      manage_docker => false,
     }
   }
 
@@ -246,12 +249,12 @@ include dockerapp::basedirs
       }
     }
 
-  if $db_server == '' { fail('db_server cannot be empty') }
-  if $db_password == '' { fail('db_password is mandatory') }
-  if $api_ssl_cert_file == '' { fail('api_ssl_cert_file is mandatory') }
-  if $api_ssl_cert_pwd == '' { fail('api_ssl_cert_pwd is mandatory') }
-  if $website_ssl_cert_file == '' { fail('website_ssl_cert_file is mandatory') }
-  if $website_ssl_cert_pwd == '' { fail('website_ssl_cert_pwd is mandatory') }
+  if $db_server == '-' { fail('db_server cannot be empty') }
+  if $db_password == '-' { fail('db_password is mandatory') }
+  if $api_ssl_cert_file == '-' { fail('api_ssl_cert_file is mandatory') }
+  if $api_ssl_cert_pwd == '-' { fail('api_ssl_cert_pwd is mandatory') }
+  if $website_ssl_cert_file == '-' { fail('website_ssl_cert_file is mandatory') }
+  if $website_ssl_cert_pwd == '-' { fail('website_ssl_cert_pwd is mandatory') }
 
   #API CONFIGS
   $envs_api = [
@@ -270,8 +273,7 @@ include dockerapp::basedirs
     "FACTER_SERVER_CERTIFICATE_PWD=${api_ssl_cert_pwd}",
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
-    "FACTER_WEBSITE_PORT=${website_port}",
-    "FACTER_ENABLE_SAML=${enable_saml}",
+    "FACTER_WEBSITE_PORT=${website_port}"
   ]
 
   file{"${conf_configdir_api}/certs":
@@ -339,7 +341,7 @@ include dockerapp::basedirs
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
-    "FACTER_ENABLE_SAML=${enable_saml}",
+    "FACTER_ENABLE_SAML=${enable_saml}"
   ]
 
 
