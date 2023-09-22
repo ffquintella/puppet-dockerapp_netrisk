@@ -143,7 +143,7 @@ describe 'dockerapp_netrisk' do
 
           it {
             is_expected.to contain_User('netrisk').with(
-              home: '/netrisk',
+              home: '/srv/application-config/nettest',
               uid: 7070,
             )
           }
@@ -175,8 +175,8 @@ describe 'dockerapp_netrisk' do
                   'FACTER_WEBSITE_PROTOCOL=https',
                   'FACTER_WEBSITE_HOST=node1.test.com',
                   'FACTER_WEBSITE_PORT=443',
-                  'FACTER_USER=netrisk',
-                  'FACTER_UID=7070',
+                  'FACTER_NETRISK_USER=netrisk',
+                  'FACTER_NETRISK_UID=7070',
                 ],
               )
           }
@@ -206,8 +206,8 @@ describe 'dockerapp_netrisk' do
                   'FACTER_WEBSITE_HOST=node1.test.com',
                   'FACTER_WEBSITE_PORT=443',
                   'FACTER_ENABLE_SAML=false',
-                  'FACTER_USER=netrisk',
-                  'FACTER_UID=7070',
+                  'FACTER_NETRISK_USER=netrisk',
+                  'FACTER_NETRISK_UID=7070',
                 ],
               )
           }
@@ -223,8 +223,8 @@ describe 'dockerapp_netrisk' do
                   'FACTER_DBPASSWORD=testepwd',
                   'FACTER_DBSCHEMA=netrisk',
                   'FACTER_SERVER_LOGGING=Information',
-                  'FACTER_USER=netrisk',
-                  'FACTER_UID=7070',
+                  'FACTER_NETRISK_USER=netrisk',
+                  'FACTER_NETRISK_UID=7070',
                 ],
               )
           }

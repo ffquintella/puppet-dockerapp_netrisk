@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 0.2.1
+
+**Features**
+Better code format
+User ID parameters
+
+## Release 0.1.8
+
+**Bugfixes**
+
+
+
 ## Release 0.1.9
 
 **Features**

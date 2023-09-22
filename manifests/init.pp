@@ -288,8 +288,8 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
-    "FACTER_USER=${user}",
-    "FACTER_UID=${uid}",
+    "FACTER_NETRISK_USER=${user}",
+    "FACTER_NETRISK_UID=${uid}",
   ]
 
   file { "${conf_configdir_api}/certs":
@@ -352,8 +352,8 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
     "FACTER_ENABLE_SAML=${enable_saml}",
-    "FACTER_USER=${user}",
-    "FACTER_UID=${uid}",
+    "FACTER_NETRISK_USER=${user}",
+    "FACTER_NETRISK_UID=${uid}",
   ]
 
   if $enable_website == true {
@@ -381,8 +381,8 @@ class dockerapp_netrisk (
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_SERVER_LOGGING=${logging}",
-    "FACTER_USER=${user}",
-    "FACTER_UID=${uid}",
+    "FACTER_NETRISK_USER=${user}",
+    "FACTER_NETRISK_UID=${uid}",
   ]
 
   if $enable_console == true {
