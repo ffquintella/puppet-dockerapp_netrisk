@@ -153,6 +153,7 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs/website.pfx') }
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs') }
 
+          it { is_expected.to contain_Docker_network('nettest-net') }
 
           it { is_expected.to contain_dockerapp__run('nettest_api')
             .with(

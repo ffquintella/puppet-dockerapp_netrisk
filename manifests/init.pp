@@ -110,144 +110,140 @@ class dockerapp_netrisk (
 
   #include dockerapp::params
 
-  if !defined(Class['dockerapp']){
+  if !defined(Class['dockerapp']) {
     class { 'dockerapp':
       manage_docker => false,
     }
   }
 
-  if !defined(Class['::docker']){
-    class {'docker':
+  if !defined(Class['docker']) {
+    class { 'docker':
       manage_service              => false,
       use_upstream_package_source => false,
       manage_package              => false,
     }
   }
 
+  $base_app_config = $dockerapp::params::config_dir
+  $base_app_home = $dockerapp::params::data_dir
+  $base_app_scripts = $dockerapp::params::scripts_dir
+  $base_app_logs = $dockerapp::params::log_dir
 
-    $base_app_config = $::dockerapp::params::config_dir
-    $base_app_home = $::dockerapp::params::data_dir
-    $base_app_scripts = $::dockerapp::params::scripts_dir
-    $base_app_logs = $::dockerapp::params::log_dir
+  $conf_homedir = "${base_app_home}/${service_name}"
+  $conf_homedir_backups = "${base_app_home}/${service_name}/backups"
+  $conf_homedir_website = "${base_app_home}/${service_name}/website"
+  $conf_homedir_api = "${base_app_home}/${service_name}/api"
+  $conf_configdir = "${base_app_config}/${service_name}"
+  $conf_configdir_website = "${base_app_config}/${service_name}/website"
+  $conf_configdir_api = "${base_app_config}/${service_name}/api"
+  $conf_configdir_configurations = "${base_app_config}/${service_name}/configurations"
+  $conf_configdir_ssl = "${base_app_config}/${service_name}/ssl"
+  $conf_scriptsdir = "${base_app_scripts}/${service_name}"
+  $conf_logsdir = "${base_app_logs}/${service_name}"
+  $conf_logsdir_website = "${base_app_logs}/${service_name}/website"
+  $conf_logsdir_api = "${base_app_logs}/${service_name}/api"
 
+  $image_name_api = "ffquintella/netrisk-api:${version}"
+  $image_name_website = "ffquintella/netrisk-website:${version}"
+  $image_name_console = "ffquintella/netrisk-console:${version}"
 
-    $conf_homedir = "${base_app_home}/${service_name}"
-    $conf_homedir_backups = "${base_app_home}/${service_name}/backups"
-    $conf_homedir_website = "${base_app_home}/${service_name}/website"
-    $conf_homedir_api = "${base_app_home}/${service_name}/api"
-    $conf_configdir = "${base_app_config}/${service_name}"
-    $conf_configdir_website = "${base_app_config}/${service_name}/website"
-    $conf_configdir_api = "${base_app_config}/${service_name}/api"
-    $conf_configdir_configurations = "${base_app_config}/${service_name}/configurations"
-    $conf_configdir_ssl = "${base_app_config}/${service_name}/ssl"
-    $conf_scriptsdir = "${base_app_scripts}/${service_name}"
-    $conf_logsdir = "${base_app_logs}/${service_name}"
-    $conf_logsdir_website = "${base_app_logs}/${service_name}/website"
-    $conf_logsdir_api = "${base_app_logs}/${service_name}/api"
+  if ! defined(File[$conf_homedir]) {
+    file { $conf_homedir:
+      ensure  => directory,
+      require => File[$base_app_home],
+    }
+  }
+  if ! defined(File[$conf_homedir_backups]) {
+    file { $conf_homedir_backups:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_homedir],
+    }
+  }
+  if ! defined(File[$conf_homedir_website]) {
+    file { $conf_homedir_website:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_homedir],
+    }
+  }
+  if ! defined(File[$conf_homedir_api]) {
+    file { $conf_homedir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_homedir],
+    }
+  }
 
-
-    $image_name_api = "ffquintella/netrisk-api:${version}"
-    $image_name_website = "ffquintella/netrisk-website:${version}"
-    $image_name_console = "ffquintella/netrisk-console:${version}"
-
-
-    if ! defined(File[$conf_homedir]) {
-      file{ $conf_homedir:
-        ensure  => directory,
-        require => File[$base_app_home],
-      }
+  if ! defined(File[$conf_configdir]) {
+    file { $conf_configdir:
+      ensure  => directory,
+      require => File[$base_app_config],
     }
-    if ! defined(File[$conf_homedir_backups]) {
-      file{ $conf_homedir_backups:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_homedir],
-      }
+  }
+  if ! defined(File[$conf_configdir_website]) {
+    file { $conf_configdir_website:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_configdir],
     }
-    if ! defined(File[$conf_homedir_website]) {
-      file{ $conf_homedir_website:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_homedir],
-      }
+  }
+  if ! defined(File[$conf_configdir_api]) {
+    file { $conf_configdir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_configdir],
     }
-    if ! defined(File[$conf_homedir_api]) {
-      file{ $conf_homedir_api:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_homedir],
-      }
+  }
+  if ! defined(File[$conf_configdir_configurations]) {
+    file { $conf_configdir_configurations:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_configdir],
     }
-
-    if ! defined(File[$conf_configdir]) {
-      file{ $conf_configdir:
-        ensure  => directory,
-        require => File[$base_app_config],
-      }
+  }
+  if ! defined(File[$conf_configdir_ssl]) {
+    file { $conf_configdir_ssl:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_configdir],
     }
-    if ! defined(File[$conf_configdir_website]) {
-      file{ $conf_configdir_website:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_configdir],
-      }
+  }
+  if ! defined(File[$conf_scriptsdir]) {
+    file { $conf_scriptsdir:
+      ensure  => directory,
+      require => File[$base_app_scripts],
     }
-    if ! defined(File[$conf_configdir_api]) {
-      file{ $conf_configdir_api:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_configdir],
-      }
+  }
+  if ! defined(File[$conf_logsdir]) {
+    file { $conf_logsdir:
+      ensure  => directory,
+      require => File[$base_app_logs],
     }
-    if ! defined(File[$conf_configdir_configurations]) {
-      file{ $conf_configdir_configurations:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_configdir],
-      }
+  }
+  if ! defined(File[$conf_logsdir_website]) {
+    file { $conf_logsdir_website:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_logsdir],
     }
-    if ! defined(File[$conf_configdir_ssl]) {
-      file{ $conf_configdir_ssl:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_configdir],
-      }
+  }
+  if ! defined(File[$conf_logsdir_api]) {
+    file { $conf_logsdir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_logsdir],
     }
-    if ! defined(File[$conf_scriptsdir]) {
-      file{ $conf_scriptsdir:
-        ensure  => directory,
-        require => File[$base_app_scripts],
-      }
-    }
-    if ! defined(File[$conf_logsdir]) {
-      file{ $conf_logsdir:
-        ensure  => directory,
-        require => File[$base_app_logs],
-      }
-    }
-    if ! defined(File[$conf_logsdir_website]) {
-      file{ $conf_logsdir_website:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_logsdir],
-      }
-    }
-    if ! defined(File[$conf_logsdir_api]) {
-      file{ $conf_logsdir_api:
-        ensure  => directory,
-        owner   => 33,
-        group   => 33,
-        require => File[$conf_logsdir],
-      }
-    }
+  }
 
   if $db_server == '-' { fail('db_server cannot be empty') }
   if $db_password == '-' { fail('db_password is mandatory') }
