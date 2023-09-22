@@ -157,6 +157,7 @@ describe 'dockerapp_netrisk' do
                 ports: ['5443:5443'],
                 volumes: [
                   '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx',
+                  '/srv/application-log/nettest/api:/var/log/netrisk',
                 ],
                 environments: [
                   'FACTER_ENABLE_SAML=false',
@@ -188,6 +189,7 @@ describe 'dockerapp_netrisk' do
                 ports: ['443:6443'],
                 volumes: [
                   '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx',
+                  '/srv/application-log/nettest/website:/var/log/netrisk',
                 ],
                 environments: [
                   'FACTER_DBSERVER=testedb',

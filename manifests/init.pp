@@ -312,6 +312,7 @@ class dockerapp_netrisk (
     $api_ports = ["${api_port}:5443"]
     $volumes_api = [
       "${conf_configdir_api}/certs/api.pfx:/netrisk/api.pfx",
+      "${conf_logsdir_api}:/var/log/netrisk",
     ]
 
     dockerapp::run { $api_service_name:
@@ -362,6 +363,7 @@ class dockerapp_netrisk (
 
     $volumes_website = [
       "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",
+      "${conf_logsdir_website}:/var/log/netrisk",
     ]
 
     dockerapp::run { $website_service_name:

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 0.3.2
+
+**Bugfixes**
+Log mapping
+
+## Release 0.3.1
+
+**Features**
+Log mapping
+
+
 ## Release 0.2.1
 
 **Features**
@@ -11,8 +22,6 @@ User ID parameters
 ## Release 0.1.8
 
 **Bugfixes**
-
-
 
 ## Release 0.1.9
 
