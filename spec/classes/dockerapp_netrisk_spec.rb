@@ -2,7 +2,6 @@
 
 require 'spec_helper'
 
-
 describe 'dockerapp_netrisk' do
 
   let(:node) { 'node1.test.com' }
@@ -106,7 +105,6 @@ describe 'dockerapp_netrisk' do
 
       it { is_expected.to compile.and_raise_error(/website_ssl_cert_pwd is mandatory/)}
     end
-
 
     context 'working example' do
     

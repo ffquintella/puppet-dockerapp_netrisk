@@ -81,12 +81,12 @@
 class dockerapp_netrisk (
   String  $service_name = 'netrisk',
   String  $version = 'latest',
-  String  $api_server = $::fqdn,
+  String  $api_server = $fqdn,
   String  $api_protocol = 'https',
   Integer $api_port = 5443,
   Integer $website_port = 443,
   String  $website_protocol = 'https',
-  String  $website_server = $::fqdn,
+  String  $website_server = $fqdn,
   String  $db_server = '-',
   Integer $db_port = 3306,
   String  $db_schema = 'netrisk',
@@ -269,18 +269,17 @@ class dockerapp_netrisk (
     "FACTER_SERVER_CERTIFICATE_PWD=${api_ssl_cert_pwd}",
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
-    "FACTER_WEBSITE_PORT=${website_port}"
+    "FACTER_WEBSITE_PORT=${website_port}",
   ]
 
-  file{"${conf_configdir_api}/certs":
+  file { "${conf_configdir_api}/certs":
     ensure  => directory,
     require => File[$conf_configdir_api],
   }
-  -> file{"${conf_configdir_api}/certs/api.pfx":
-    ensure => present,
+  -> file { "${conf_configdir_api}/certs/api.pfx":
+    ensure => file,
     source => $api_ssl_cert_file,
   }
-
 
   $network_name = "${service_name}-net"
 
@@ -288,13 +287,9 @@ class dockerapp_netrisk (
     ensure   => present,
   }
 
-
   if $enable_api == true {
-
     $api_service_name = "${service_name}_api"
-
     $api_ports = ["${api_port}:5443"]
-
     $volumes_api = [
       "${conf_configdir_api}/certs/api.pfx:/netrisk/api.pfx",
     ]
@@ -309,15 +304,14 @@ class dockerapp_netrisk (
     }
   }
 
-
   #WEBSITE CONFIGS
 
-  file{"${conf_configdir_website}/certs":
+  file { "${conf_configdir_website}/certs":
     ensure  => directory,
     require => File[$conf_configdir_website],
   }
-  -> file{"${conf_configdir_website}/certs/website.pfx":
-    ensure => present,
+  -> file { "${conf_configdir_website}/certs/website.pfx":
+    ensure => file,
     source => $website_ssl_cert_file,
   }
 
@@ -337,14 +331,11 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
-    "FACTER_ENABLE_SAML=${enable_saml}"
+    "FACTER_ENABLE_SAML=${enable_saml}",
   ]
 
-
   if $enable_website == true {
-
     $website_service_name = "${service_name}_website"
-
     $website_ports = ["${website_port}:6443"]
 
     $volumes_website = [
@@ -370,11 +361,8 @@ class dockerapp_netrisk (
     "FACTER_SERVER_LOGGING=${logging}",
   ]
 
-
   if $enable_console == true {
-
     $console_service_name = "${service_name}_console"
-
 
     dockerapp::run { $console_service_name:
       image        => $image_name_console,
@@ -382,5 +370,4 @@ class dockerapp_netrisk (
       net          => $network_name,
     }
   }
-
 }
