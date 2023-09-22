@@ -271,6 +271,7 @@ include dockerapp::basedirs
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
+    "FACTER_ENABLE_SAML=${enable_saml}",
   ]
 
   file{"${conf_configdir_api}/certs":
@@ -338,6 +339,7 @@ include dockerapp::basedirs
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
+    "FACTER_ENABLE_SAML=${enable_saml}",
   ]
 
 
