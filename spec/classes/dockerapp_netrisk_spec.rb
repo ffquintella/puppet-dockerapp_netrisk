@@ -140,6 +140,9 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/api.pfx') }
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs/website.pfx') }
           it { is_expected.to contain_file('/srv/application-config/nettest/website/certs') }
+          it { is_expected.to contain_file('/srv/application-config/nettest/backgroundjobs') }
+          it { is_expected.to contain_file('/srv/application-log/nettest/backgroundjobs') }
+          it { is_expected.to contain_file('/srv/application-data/nettest/backgroundjobs') }
 
           it {
             is_expected.to contain_User('netrisk').with(
