@@ -430,6 +430,7 @@ class dockerapp_netrisk (
   }
 
   $envs_backgroundjobs = [
+    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
