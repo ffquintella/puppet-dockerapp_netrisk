@@ -79,6 +79,9 @@
 # @param user
 #   The user used to run the processes
 #
+# @enable_backgroundjobs
+#   If we need to use background jobs
+#
 # @param uid
 #   The uid of the user used ot run the processes
 #
@@ -109,6 +112,7 @@ class dockerapp_netrisk (
   Boolean $enable_api = true,
   Boolean $enable_website = true,
   Boolean $enable_console = true,
+  Boolean $enable_backgroundjobs = true,
   Boolean $enable_saml = false,
   String $user = 'netrisk',
   Integer $uid = 7070,
@@ -141,19 +145,23 @@ class dockerapp_netrisk (
   $conf_homedir_backups = "${base_app_home}/${service_name}/backups"
   $conf_homedir_website = "${base_app_home}/${service_name}/website"
   $conf_homedir_api = "${base_app_home}/${service_name}/api"
+  $conf_homedir_backgroundjobs = "${base_app_home}/${service_name}/backgroundjobs"
   $conf_configdir = "${base_app_config}/${service_name}"
   $conf_configdir_website = "${base_app_config}/${service_name}/website"
   $conf_configdir_api = "${base_app_config}/${service_name}/api"
+  $conf_configdir_backgroundjobs = "${base_app_config}/${service_name}/backgroundjobs"
   $conf_configdir_configurations = "${base_app_config}/${service_name}/configurations"
   $conf_configdir_ssl = "${base_app_config}/${service_name}/ssl"
   $conf_scriptsdir = "${base_app_scripts}/${service_name}"
   $conf_logsdir = "${base_app_logs}/${service_name}"
   $conf_logsdir_website = "${base_app_logs}/${service_name}/website"
   $conf_logsdir_api = "${base_app_logs}/${service_name}/api"
+  $conf_logsdir_backgroundjobs = "${base_app_logs}/${service_name}/backgroundjobs"
 
   $image_name_api = "ffquintella/netrisk-api:${version}"
   $image_name_website = "ffquintella/netrisk-website:${version}"
   $image_name_console = "ffquintella/netrisk-console:${version}"
+  $image_name_backgroundjobs = "ffquintella/netrisk-backgroundjobs:${version}"
 
   if ! defined(File[$conf_homedir]) {
     file { $conf_homedir:
@@ -179,6 +187,14 @@ class dockerapp_netrisk (
   }
   if ! defined(File[$conf_homedir_api]) {
     file { $conf_homedir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_homedir],
+    }
+  }
+  if ! defined(File[$conf_homedir_backgroundjobs]) {
+    file { $conf_homedir_backgroundjobs:
       ensure  => directory,
       owner   => 33,
       group   => 33,
@@ -212,6 +228,14 @@ class dockerapp_netrisk (
   }
   if ! defined(File[$conf_configdir_api]) {
     file { $conf_configdir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_configdir],
+    }
+  }
+  if ! defined(File[$conf_configdir_backgroundjobs]) {
+    file { $conf_configdir_backgroundjobs:
       ensure  => directory,
       owner   => 33,
       group   => 33,
@@ -256,6 +280,14 @@ class dockerapp_netrisk (
   }
   if ! defined(File[$conf_logsdir_api]) {
     file { $conf_logsdir_api:
+      ensure  => directory,
+      owner   => 33,
+      group   => 33,
+      require => File[$conf_logsdir],
+    }
+  }
+  if ! defined(File[$conf_logsdir_backgroundjobs]) {
+    file { $conf_logsdir_backgroundjobs:
       ensure  => directory,
       owner   => 33,
       group   => 33,
@@ -393,6 +425,27 @@ class dockerapp_netrisk (
     dockerapp::run { $console_service_name:
       image        => $image_name_console,
       environments => $envs_console,
+      net          => $network_name,
+    }
+  }
+
+  $envs_backgroundjobs = [
+    "FACTER_DBSERVER=${db_server}",
+    "FACTER_DBUSER=${db_user}",
+    "FACTER_DBPORT=${db_port}",
+    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBSCHEMA=${db_schema}",
+    "FACTER_SERVER_LOGGING=${logging}",
+    "FACTER_NETRISK_USER=${user}",
+    "FACTER_NETRISK_UID=${uid}",
+  ]
+
+  if $enable_backgroundjobs == true {
+    $backgroundjobs_service_name = "${service_name}_backgroundjobs"
+
+    dockerapp::run { $backgroundjobs_service_name:
+      image        => $image_name_backgroundjobs,
+      environments => $envs_backgroundjobs,
       net          => $network_name,
     }
   }

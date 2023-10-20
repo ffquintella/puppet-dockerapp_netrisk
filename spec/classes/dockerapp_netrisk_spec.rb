@@ -230,6 +230,23 @@ describe 'dockerapp_netrisk' do
                 ],
               )
           }
+
+          it {
+            is_expected.to contain_dockerapp__run('nettest_backgroundjobs')
+              .with(
+                image: 'ffquintella/netrisk-backgroundjobs:1.4.1',
+                environments: [
+                  'FACTER_DBSERVER=testedb',
+                  'FACTER_DBUSER=netrisk',
+                  'FACTER_DBPORT=3306',
+                  'FACTER_DBPASSWORD=testepwd',
+                  'FACTER_DBSCHEMA=netrisk',
+                  'FACTER_SERVER_LOGGING=Information',
+                  'FACTER_NETRISK_USER=netrisk',
+                  'FACTER_NETRISK_UID=7070',
+                ],
+              )
+          }
         end
       end
     end
