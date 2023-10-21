@@ -392,7 +392,7 @@ class dockerapp_netrisk (
 
   if $enable_website == true {
     $website_service_name = "${service_name}_website"
-    $website_ports = ["${website_port}:5443"]
+    $website_ports = ["${website_port}:${website_port}"]
 
     $volumes_website = [
       "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",

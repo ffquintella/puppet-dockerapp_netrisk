@@ -189,7 +189,7 @@ describe 'dockerapp_netrisk' do
             is_expected.to contain_dockerapp__run('nettest_website')
               .with(
                 image: 'ffquintella/netrisk-website:1.4.1',
-                ports: ['443:5443'],
+                ports: ['443:443'],
                 volumes: [
                   '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx',
                   '/srv/application-log/nettest/website:/var/log/netrisk',
