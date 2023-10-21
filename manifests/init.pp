@@ -163,6 +163,15 @@ class dockerapp_netrisk (
   $image_name_console = "ffquintella/netrisk-console:${version}"
   $image_name_backgroundjobs = "ffquintella/netrisk-backgroundjobs:${version}"
 
+  if !defined(User[$user]) {
+    user { $user:
+      home    => $conf_configdir,
+      shell   => '/bin/bash',
+      uid     => $uid,
+      require => File[$conf_configdir],
+    }
+  }
+
   if ! defined(File[$conf_homedir]) {
     file { $conf_homedir:
       ensure  => directory,
@@ -172,33 +181,29 @@ class dockerapp_netrisk (
   if ! defined(File[$conf_homedir_backups]) {
     file { $conf_homedir_backups:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_homedir],
+      owner   => $user,
+      require => [File[$conf_homedir],User[$user]],
     }
   }
   if ! defined(File[$conf_homedir_website]) {
     file { $conf_homedir_website:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_homedir],
+      owner   => $user,
+      require => [File[$conf_homedir],User[$user]],
     }
   }
   if ! defined(File[$conf_homedir_api]) {
     file { $conf_homedir_api:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_homedir],
+      owner   => $user,
+      require => [File[$conf_homedir],User[$user]],
     }
   }
   if ! defined(File[$conf_homedir_backgroundjobs]) {
     file { $conf_homedir_backgroundjobs:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_homedir],
+      owner   => $user,
+      require => [File[$conf_homedir],User[$user]],
     }
   }
 
@@ -209,53 +214,39 @@ class dockerapp_netrisk (
     }
   }
 
-  if !defined(User[$user]) {
-    user { $user:
-      home    => $conf_configdir,
-      shell   => '/bin/bash',
-      uid     => $uid,
-      require => File[$conf_configdir],
-    }
-  }
-
   if ! defined(File[$conf_configdir_website]) {
     file { $conf_configdir_website:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_configdir],
+      owner   => $user,
+      require => [File[$conf_configdir],User[$user]],
     }
   }
   if ! defined(File[$conf_configdir_api]) {
     file { $conf_configdir_api:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_configdir],
+      owner   => $user,
+      require => [File[$conf_configdir],User[$user]],
     }
   }
   if ! defined(File[$conf_configdir_backgroundjobs]) {
     file { $conf_configdir_backgroundjobs:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_configdir],
+      owner   => $user,
+      require => [File[$conf_configdir],User[$user]],
     }
   }
   if ! defined(File[$conf_configdir_configurations]) {
     file { $conf_configdir_configurations:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_configdir],
+      owner   => $user,
+      require => [File[$conf_configdir],User[$user]],
     }
   }
   if ! defined(File[$conf_configdir_ssl]) {
     file { $conf_configdir_ssl:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_configdir],
+      owner   => $user,
+      require => [File[$conf_configdir],User[$user]],
     }
   }
   if ! defined(File[$conf_scriptsdir]) {
@@ -273,25 +264,22 @@ class dockerapp_netrisk (
   if ! defined(File[$conf_logsdir_website]) {
     file { $conf_logsdir_website:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_logsdir],
+      owner   => $user,
+      require => [File[$conf_logsdir],User[$user]],
     }
   }
   if ! defined(File[$conf_logsdir_api]) {
     file { $conf_logsdir_api:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_logsdir],
+      owner   => $user,
+      require => [File[$conf_logsdir],User[$user]],
     }
   }
   if ! defined(File[$conf_logsdir_backgroundjobs]) {
     file { $conf_logsdir_backgroundjobs:
       ensure  => directory,
-      owner   => 33,
-      group   => 33,
-      require => File[$conf_logsdir],
+      owner   => $user,
+      require => [File[$conf_logsdir],User[$user]],
     }
   }
 
