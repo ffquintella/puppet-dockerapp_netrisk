@@ -384,6 +384,7 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
+    "FACTER_SERVER_HTTPS_PORT=${website_port}",
     "FACTER_ENABLE_SAML=${enable_saml}",
     "FACTER_NETRISK_USER=${user}",
     "FACTER_NETRISK_UID=${uid}",
@@ -391,7 +392,7 @@ class dockerapp_netrisk (
 
   if $enable_website == true {
     $website_service_name = "${service_name}_website"
-    $website_ports = ["${website_port}:6443"]
+    $website_ports = ["${website_port}:5443"]
 
     $volumes_website = [
       "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",

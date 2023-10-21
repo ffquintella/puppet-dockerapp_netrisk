@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 0.4.3
+
+**Bugfixes**
+Website starting parameters
+
+
 ## Release 0.4.2
 
 **Bugfixes**

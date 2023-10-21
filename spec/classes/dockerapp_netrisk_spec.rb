@@ -189,7 +189,7 @@ describe 'dockerapp_netrisk' do
             is_expected.to contain_dockerapp__run('nettest_website')
               .with(
                 image: 'ffquintella/netrisk-website:1.4.1',
-                ports: ['443:6443'],
+                ports: ['443:5443'],
                 volumes: [
                   '/srv/application-config/nettest/website/certs/website.pfx:/netrisk/website.pfx',
                   '/srv/application-log/nettest/website:/var/log/netrisk',
@@ -210,6 +210,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_WEBSITE_PROTOCOL=https',
                   'FACTER_WEBSITE_HOST=node1.test.com',
                   'FACTER_WEBSITE_PORT=443',
+                  "FACTER_SERVER_HTTPS_PORT=443",
                   'FACTER_ENABLE_SAML=false',
                   'FACTER_NETRISK_USER=netrisk',
                   'FACTER_NETRISK_UID=7070',
