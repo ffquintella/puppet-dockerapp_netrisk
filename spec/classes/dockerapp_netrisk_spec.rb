@@ -143,6 +143,7 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-config/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/srv/application-log/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/srv/application-data/nettest/backgroundjobs') }
+          it { is_expected.to contain_file('/usr/local/bin/netrisk-console') }
 
           it {
             is_expected.to contain_User('netrisk').with(

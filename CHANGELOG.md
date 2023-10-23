@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Release 0.4.5
 
+**Features**
+Including shortcut to consoleclient command
+
+## Release 0.4.5
+
 **Bugfixes**
 Fix directory ownership
 
