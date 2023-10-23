@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## Release 0.4.5
+## Release 0.4.7
+
+**Bugfixes**
+netrisk-console template
+
+## Release 0.4.6
 
 **Features**
 Including shortcut to consoleclient command
