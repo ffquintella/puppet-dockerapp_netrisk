@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Release 0.4.7
+## Release 0.4.7-8
 
 **Bugfixes**
 netrisk-console template
