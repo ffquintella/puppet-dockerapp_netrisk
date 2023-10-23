@@ -1,0 +1,7 @@
+<%- | 
+String  $service_name
+| -%>
+
+#!/usr/bin/env bash
+
+docker exec -ti <%= $service_name -%>_console /bin/bash -c "cd /netrisk; /netrisk/ConsoleClient $@"

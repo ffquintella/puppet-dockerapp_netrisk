@@ -411,6 +411,15 @@ class dockerapp_netrisk (
   if $enable_console == true {
     $console_service_name = "${service_name}_console"
 
+    file{'/usr/local/bin/netrisk-console':
+      ensure  => file,
+      owner   => $user,
+      content => epp('puppet-dockerapp_netrisk/netrisk-console.epp', {
+        'service_name' => $console_service_name
+      })
+    }
+
+
     dockerapp::run { $console_service_name:
       image        => $image_name_console,
       environments => $envs_console,
