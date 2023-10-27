@@ -4,5 +4,5 @@ String  $service_name
 
 #!/usr/bin/env bash
 
-docker exec -ti <%= $service_name %> /bin/bash -c "cd /netrisk; /netrisk/ConsoleClient $@"
+docker exec -ti <%= $service_name %> /bin/bash -c "cd /netrisk; /netrisk/ConsoleClient \"$@\""
 
