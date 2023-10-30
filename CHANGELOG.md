@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 0.5.2
+
+**Bugfixes**
+Fix sp_certificate
+
+
 ## Release 0.5.1
 
 **Features**
