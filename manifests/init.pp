@@ -116,6 +116,11 @@ class dockerapp_netrisk (
   Boolean $enable_saml = false,
   String $user = 'netrisk',
   Integer $uid = 7070,
+  String $idp_entity_id = '',
+  String $idp_sso_service = '',
+  String $idp_ssout_service = '',
+  String $idp_artifact_resolve_srvc = '',
+  String $idp_certificate = '',
 ) {
   include dockerapp::params
   include dockerapp::basedirs
@@ -310,6 +315,11 @@ class dockerapp_netrisk (
     "FACTER_WEBSITE_PORT=${website_port}",
     "FACTER_NETRISK_USER=${user}",
     "FACTER_NETRISK_UID=${uid}",
+    "FACTER_IDP_ENTITY_ID=${idp_entity_id}",
+    "FACTER_IDP_SSO_SERVICE=${idp_sso_service}",
+    "FACTER_IDP_SSOUT_SERVICE=${idp_ssout_service}",
+    "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
+    "FACTER_IDP_CERTIFICATE=${idp_certificate}",
   ]
 
   file { "${conf_configdir_api}/certs":
