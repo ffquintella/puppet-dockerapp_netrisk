@@ -121,8 +121,8 @@ class dockerapp_netrisk (
   String $idp_ssout_service = '',
   String $idp_artifact_resolve_srvc = '',
   String $idp_certificate = '',
-  String $sp_certificate_file,
-  String $sp_certificate_pwd,
+  String $sp_certificate_file = '',
+  String $sp_certificate_pwd = '',
 ) {
   include dockerapp::params
   include dockerapp::basedirs
