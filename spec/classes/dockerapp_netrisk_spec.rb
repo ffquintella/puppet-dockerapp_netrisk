@@ -182,6 +182,11 @@ describe 'dockerapp_netrisk' do
                   'FACTER_WEBSITE_PORT=443',
                   'FACTER_NETRISK_USER=netrisk',
                   'FACTER_NETRISK_UID=7070',
+                  'FACTER_IDP_ENTITY_ID=',
+                  'FACTER_IDP_SSO_SERVICE=',
+                  'FACTER_IDP_SSOUT_SERVICE=',
+                  'FACTER_IDP_ARTIFACT_RESOLVE_SRVC=',
+                  'FACTER_IDP_CERTIFICATE=',
                 ],
               )
           }
