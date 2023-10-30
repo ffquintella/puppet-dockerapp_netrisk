@@ -189,6 +189,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_IDP_CERTIFICATE=',
                   'FACTER_SP_CERTIFICATE_FILE=',
                   'FACTER_SP_CERTIFICATE_PWD=',
+                ],
               )
           }
 
