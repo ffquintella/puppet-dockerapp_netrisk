@@ -322,7 +322,7 @@ class dockerapp_netrisk (
     "FACTER_IDP_SSO_SERVICE=${idp_sso_service}",
     "FACTER_IDP_SSOUT_SERVICE=${idp_ssout_service}",
     "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
-    'FACTER_IDP_CERTIFICATE=/netrisk/idp.pem',
+    'FACTER_IDP_CERTIFICATE_FILE=/netrisk/idp.pem',
     'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
   ]

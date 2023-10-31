@@ -194,7 +194,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_IDP_SSO_SERVICE=',
                   'FACTER_IDP_SSOUT_SERVICE=',
                   'FACTER_IDP_ARTIFACT_RESOLVE_SRVC=',
-                  'FACTER_IDP_CERTIFICATE=/netrisk/idp.pem',
+                  'FACTER_IDP_CERTIFICATE_FILE=/netrisk/idp.pem',
                   'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
                   'FACTER_SP_CERTIFICATE_PWD=123',
                 ],
