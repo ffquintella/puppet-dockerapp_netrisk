@@ -107,6 +107,9 @@ describe 'dockerapp_netrisk' do
           db_password: 'testepwd',
           api_ssl_cert_file: '/sslfile.pfx',
           api_ssl_cert_pwd: '123',
+          idp_certificate: '/api.pem',
+          sp_certificate_file: '/sp.pfx',
+          sp_certificate_pwd: '123',
           website_ssl_cert_file: '/ws_sslfile.pfx',
           website_ssl_cert_pwd: '1234',
           enable_saml: false
@@ -144,6 +147,8 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-log/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/srv/application-data/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/usr/local/bin/netrisk-console') }
+          it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/idp.pem') }
+          it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/sp.pfx') }
 
           it {
             is_expected.to contain_User('netrisk').with(
@@ -161,6 +166,8 @@ describe 'dockerapp_netrisk' do
                 ports: ['5443:5443'],
                 volumes: [
                   '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx',
+                  '/srv/application-config/nettest/api/certs/idp.pem:/netrisk/idp.pem',
+                  '/srv/application-config/nettest/api/certs/sp.pfx:/netrisk/sp.pfx',
                   '/srv/application-log/nettest/api:/var/log/netrisk',
                 ],
                 environments: [
@@ -187,9 +194,9 @@ describe 'dockerapp_netrisk' do
                   'FACTER_IDP_SSO_SERVICE=',
                   'FACTER_IDP_SSOUT_SERVICE=',
                   'FACTER_IDP_ARTIFACT_RESOLVE_SRVC=',
-                  'FACTER_IDP_CERTIFICATE=',
-                  'FACTER_SP_CERTIFICATE_FILE=',
-                  'FACTER_SP_CERTIFICATE_PWD=',
+                  'FACTER_IDP_CERTIFICATE=/netrisk/idp.pem',
+                  'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
+                  'FACTER_SP_CERTIFICATE_PWD=123',
                 ],
               )
           }

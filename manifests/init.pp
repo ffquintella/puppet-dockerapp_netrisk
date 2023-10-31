@@ -322,8 +322,8 @@ class dockerapp_netrisk (
     "FACTER_IDP_SSO_SERVICE=${idp_sso_service}",
     "FACTER_IDP_SSOUT_SERVICE=${idp_ssout_service}",
     "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
-    "FACTER_IDP_CERTIFICATE=${idp_certificate}",
-    "FACTER_SP_CERTIFICATE_FILE=${sp_certificate_file}",
+    'FACTER_IDP_CERTIFICATE=/netrisk/idp.pem',
+    'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
   ]
 
@@ -334,6 +334,16 @@ class dockerapp_netrisk (
   -> file { "${conf_configdir_api}/certs/api.pfx":
     ensure => file,
     source => $api_ssl_cert_file,
+  }
+  file { "${conf_configdir_api}/certs/idp.pem":
+    ensure  => file,
+    source  => $idp_certificate,
+    require => File["${conf_configdir_api}/certs"],
+  }
+  file { "${conf_configdir_api}/certs/sp.pfx":
+    ensure  => file,
+    source  => $sp_certificate_file,
+    require => File["${conf_configdir_api}/certs"],
   }
 
   $network_name = "${service_name}-net"
@@ -347,6 +357,8 @@ class dockerapp_netrisk (
     $api_ports = ["${api_port}:5443"]
     $volumes_api = [
       "${conf_configdir_api}/certs/api.pfx:/netrisk/api.pfx",
+      "${conf_configdir_api}/certs/idp.pem:/netrisk/idp.pem",
+      "${conf_configdir_api}/certs/sp.pfx:/netrisk/sp.pfx",
       "${conf_logsdir_api}:/var/log/netrisk",
     ]
 
