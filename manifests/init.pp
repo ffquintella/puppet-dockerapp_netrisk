@@ -305,7 +305,7 @@ class dockerapp_netrisk (
     "FACTER_DBPORT=${db_port}",
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_EMAIL_FROM=${email_from}",
     "FACTER_EMAIL_SERVER=${email_server}",
@@ -389,7 +389,7 @@ class dockerapp_netrisk (
     "FACTER_DBPORT=${db_port}",
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_EMAIL_FROM=${email_from}",
     "FACTER_EMAIL_SERVER=${email_server}",
@@ -454,7 +454,7 @@ class dockerapp_netrisk (
   }
 
   $envs_backgroundjobs = [
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",

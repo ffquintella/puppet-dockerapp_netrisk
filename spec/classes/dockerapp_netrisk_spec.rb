@@ -177,7 +177,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_DBPORT=3306',
                   'FACTER_DBPASSWORD=testepwd',
                   'FACTER_DBSCHEMA=netrisk',
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_SERVER_LOGGING=Information',
                   'FACTER_EMAIL_FROM=netrisk@mail.com',
                   'FACTER_EMAIL_SERVER=localhost',
@@ -216,7 +216,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_DBPORT=3306',
                   'FACTER_DBPASSWORD=testepwd',
                   'FACTER_DBSCHEMA=netrisk',
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_SERVER_LOGGING=Information',
                   'FACTER_EMAIL_FROM=netrisk@mail.com',
                   'FACTER_EMAIL_SERVER=localhost',
@@ -256,7 +256,7 @@ describe 'dockerapp_netrisk' do
               .with(
                 image: 'ffquintella/netrisk-backgroundjobs:1.4.1',
                 environments: [
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_DBSERVER=testedb',
                   'FACTER_DBUSER=netrisk',
                   'FACTER_DBPORT=3306',
