@@ -313,7 +313,7 @@ class dockerapp_netrisk (
     "FACTER_DBPORT=${db_port}",
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_EMAIL_FROM=${email_from}",
     "FACTER_EMAIL_SERVER=${email_server}",
@@ -330,8 +330,8 @@ class dockerapp_netrisk (
     "FACTER_IDP_SSO_SERVICE=${idp_sso_service}",
     "FACTER_IDP_SSOUT_SERVICE=${idp_ssout_service}",
     "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
-    "FACTER_IDP_CERTIFICATE_FILE=${idp_certificate}",
-    "FACTER_SP_CERTIFICATE_FILE=${sp_certificate_file}",
+    'FACTER_IDP_CERTIFICATE_FILE=/netrisk/idp.pem',
+    'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
   ]
 
@@ -342,6 +342,16 @@ class dockerapp_netrisk (
   -> file { "${conf_configdir_api}/certs/api.pfx":
     ensure => file,
     source => $api_ssl_cert_file,
+  }
+  file { "${conf_configdir_api}/certs/idp.pem":
+    ensure  => file,
+    source  => $idp_certificate,
+    require => File["${conf_configdir_api}/certs"],
+  }
+  file { "${conf_configdir_api}/certs/sp.pfx":
+    ensure  => file,
+    source  => $sp_certificate_file,
+    require => File["${conf_configdir_api}/certs"],
   }
 
   $network_name = "${service_name}-net"
@@ -355,6 +365,8 @@ class dockerapp_netrisk (
     $api_ports = ["${api_port}:5443"]
     $volumes_api = [
       "${conf_configdir_api}/certs/api.pfx:/netrisk/api.pfx",
+      "${conf_configdir_api}/certs/idp.pem:/netrisk/idp.pem",
+      "${conf_configdir_api}/certs/sp.pfx:/netrisk/sp.pfx",
       "${conf_logsdir_api}:/var/log/netrisk",
     ]
 
@@ -385,7 +397,7 @@ class dockerapp_netrisk (
     "FACTER_DBPORT=${db_port}",
     "FACTER_DBPASSWORD=${db_password}",
     "FACTER_DBSCHEMA=${db_schema}",
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_EMAIL_FROM=${email_from}",
     "FACTER_EMAIL_SERVER=${email_server}",
@@ -456,7 +468,7 @@ class dockerapp_netrisk (
   }
 
   $envs_backgroundjobs = [
-    "FACTER_NETRISK_URL=${api_protocol}//${api_server}:${api_port}",
+    "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",

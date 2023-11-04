@@ -13,7 +13,6 @@ Including backups
 **Bugfixes**
 Fix sp_certificate
 
-
 ## Release 0.5.1
 
 **Features**

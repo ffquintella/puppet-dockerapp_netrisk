@@ -107,6 +107,9 @@ describe 'dockerapp_netrisk' do
           db_password: 'testepwd',
           api_ssl_cert_file: '/sslfile.pfx',
           api_ssl_cert_pwd: '123',
+          idp_certificate: '/api.pem',
+          sp_certificate_file: '/sp.pfx',
+          sp_certificate_pwd: '123',
           website_ssl_cert_file: '/ws_sslfile.pfx',
           website_ssl_cert_pwd: '1234',
           enable_saml: false
@@ -144,6 +147,8 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/srv/application-log/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/srv/application-data/nettest/backgroundjobs') }
           it { is_expected.to contain_file('/usr/local/bin/netrisk-console') }
+          it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/idp.pem') }
+          it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/sp.pfx') }
 
           it {
             is_expected.to contain_User('netrisk').with(
@@ -161,6 +166,8 @@ describe 'dockerapp_netrisk' do
                 ports: ['5443:5443'],
                 volumes: [
                   '/srv/application-config/nettest/api/certs/api.pfx:/netrisk/api.pfx',
+                  '/srv/application-config/nettest/api/certs/idp.pem:/netrisk/idp.pem',
+                  '/srv/application-config/nettest/api/certs/sp.pfx:/netrisk/sp.pfx',
                   '/srv/application-log/nettest/api:/var/log/netrisk',
                 ],
                 environments: [
@@ -170,7 +177,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_DBPORT=3306',
                   'FACTER_DBPASSWORD=testepwd',
                   'FACTER_DBSCHEMA=netrisk',
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_SERVER_LOGGING=Information',
                   'FACTER_EMAIL_FROM=netrisk@mail.com',
                   'FACTER_EMAIL_SERVER=localhost',
@@ -187,9 +194,9 @@ describe 'dockerapp_netrisk' do
                   'FACTER_IDP_SSO_SERVICE=',
                   'FACTER_IDP_SSOUT_SERVICE=',
                   'FACTER_IDP_ARTIFACT_RESOLVE_SRVC=',
-                  'FACTER_IDP_CERTIFICATE_FILE=',
-                  'FACTER_SP_CERTIFICATE_FILE=',
-                  'FACTER_SP_CERTIFICATE_PWD=',
+                  'FACTER_IDP_CERTIFICATE_FILE=/netrisk/idp.pem',
+                  'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
+                  'FACTER_SP_CERTIFICATE_PWD=123',
                 ],
               )
           }
@@ -209,7 +216,7 @@ describe 'dockerapp_netrisk' do
                   'FACTER_DBPORT=3306',
                   'FACTER_DBPASSWORD=testepwd',
                   'FACTER_DBSCHEMA=netrisk',
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_SERVER_LOGGING=Information',
                   'FACTER_EMAIL_FROM=netrisk@mail.com',
                   'FACTER_EMAIL_SERVER=localhost',
@@ -249,7 +256,7 @@ describe 'dockerapp_netrisk' do
               .with(
                 image: 'ffquintella/netrisk-backgroundjobs:1.4.1',
                 environments: [
-                  'FACTER_NETRISK_URL=https//node1.test.com:5443',
+                  'FACTER_NETRISK_URL=https://node1.test.com:5443',
                   'FACTER_DBSERVER=testedb',
                   'FACTER_DBUSER=netrisk',
                   'FACTER_DBPORT=3306',
