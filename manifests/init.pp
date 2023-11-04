@@ -418,7 +418,7 @@ class dockerapp_netrisk (
     $website_ports = ["${website_port}:${website_port}"]
 
     $volumes_website = [
-      "${conf_configdir_website}/console/:/netrisk/website.pfx",
+      "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",
       "${conf_logsdir_website}:/var/log/netrisk",
     ]
 

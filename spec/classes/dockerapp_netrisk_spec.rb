@@ -149,6 +149,7 @@ describe 'dockerapp_netrisk' do
           it { is_expected.to contain_file('/usr/local/bin/netrisk-console') }
           it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/idp.pem') }
           it { is_expected.to contain_file('/srv/application-config/nettest/api/certs/sp.pfx') }
+          it { is_expected.to contain_file('/srv/application-log/nettest/console') }
 
           it {
             is_expected.to contain_User('netrisk').with(
