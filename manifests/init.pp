@@ -163,6 +163,7 @@ class dockerapp_netrisk (
   $conf_logsdir = "${base_app_logs}/${service_name}"
   $conf_logsdir_website = "${base_app_logs}/${service_name}/website"
   $conf_logsdir_api = "${base_app_logs}/${service_name}/api"
+  $conf_logsdir_console = "${base_app_logs}/${service_name}/console"
   $conf_logsdir_backgroundjobs = "${base_app_logs}/${service_name}/backgroundjobs"
 
   $image_name_api = "ffquintella/netrisk-api:${version}"
@@ -282,6 +283,13 @@ class dockerapp_netrisk (
       require => [File[$conf_logsdir],User[$user]],
     }
   }
+  if ! defined(File[$conf_logsdir_console]) {
+    file { $conf_logsdir_console:
+      ensure  => directory,
+      owner   => $user,
+      require => [File[$conf_logsdir],User[$user]],
+    }
+  }
   if ! defined(File[$conf_logsdir_backgroundjobs]) {
     file { $conf_logsdir_backgroundjobs:
       ensure  => directory,
@@ -322,7 +330,7 @@ class dockerapp_netrisk (
     "FACTER_IDP_SSO_SERVICE=${idp_sso_service}",
     "FACTER_IDP_SSOUT_SERVICE=${idp_ssout_service}",
     "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
-    "FACTER_IDP_CERTIFICATE=${idp_certificate}",
+    "FACTER_IDP_CERTIFICATE_FILE=${idp_certificate}",
     "FACTER_SP_CERTIFICATE_FILE=${sp_certificate_file}",
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
   ]
@@ -398,7 +406,7 @@ class dockerapp_netrisk (
     $website_ports = ["${website_port}:${website_port}"]
 
     $volumes_website = [
-      "${conf_configdir_website}/certs/website.pfx:/netrisk/website.pfx",
+      "${conf_configdir_website}/console/:/netrisk/website.pfx",
       "${conf_logsdir_website}:/var/log/netrisk",
     ]
 
@@ -426,6 +434,11 @@ class dockerapp_netrisk (
   if $enable_console == true {
     $console_service_name = "${service_name}_console"
 
+    $volumes_console = [
+      "${conf_homedir_backups}:/backups",
+      "${conf_logsdir_console}:/var/log/netrisk",
+    ]
+
     file { '/usr/local/bin/netrisk-console':
       ensure  => file,
       owner   => $user,
@@ -437,6 +450,7 @@ class dockerapp_netrisk (
     dockerapp::run { $console_service_name:
       image        => $image_name_console,
       environments => $envs_console,
+      volumes      => $volumes_console,
       net          => $network_name,
     }
   }
@@ -456,9 +470,15 @@ class dockerapp_netrisk (
   if $enable_backgroundjobs == true {
     $backgroundjobs_service_name = "${service_name}_backgroundjobs"
 
+    $volumes_backgroundjobs = [
+      "${conf_homedir_backups}:/backups",
+      "${conf_logsdir_backgroundjobs}:/var/log/netrisk",
+    ]
+
     dockerapp::run { $backgroundjobs_service_name:
       image        => $image_name_backgroundjobs,
       environments => $envs_backgroundjobs,
+      volumes      => $volumes_backgroundjobs,
       net          => $network_name,
     }
   }
