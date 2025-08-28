@@ -209,7 +209,7 @@ class dockerapp_netrisk (
     }
   }
   if ! defined(File[$conf_homedir_api_plugins]) {
-    file { $conf_homedir_api:
+    file { $conf_homedir_api_plugins:
       ensure  => directory,
       owner   => $user,
       require => [File[$conf_homedir_api],User[$user]],
