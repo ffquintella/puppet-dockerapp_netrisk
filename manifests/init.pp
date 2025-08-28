@@ -152,6 +152,7 @@ class dockerapp_netrisk (
   $conf_homedir_backups = "${base_app_home}/${service_name}/backups"
   $conf_homedir_website = "${base_app_home}/${service_name}/website"
   $conf_homedir_api = "${base_app_home}/${service_name}/api"
+  $conf_homedir_api_plugins = "${conf_homedir_api}/plugins"
   $conf_homedir_backgroundjobs = "${base_app_home}/${service_name}/backgroundjobs"
   $conf_configdir = "${base_app_config}/${service_name}"
   $conf_configdir_website = "${base_app_config}/${service_name}/website"
@@ -205,6 +206,13 @@ class dockerapp_netrisk (
       ensure  => directory,
       owner   => $user,
       require => [File[$conf_homedir],User[$user]],
+    }
+  }
+  if ! defined(File[$conf_homedir_api_plugins]) {
+    file { $conf_homedir_api:
+      ensure  => directory,
+      owner   => $user,
+      require => [File[$conf_homedir_api],User[$user]],
     }
   }
   if ! defined(File[$conf_homedir_backgroundjobs]) {
@@ -368,6 +376,7 @@ class dockerapp_netrisk (
       "${conf_configdir_api}/certs/idp.pem:/netrisk/idp.pem",
       "${conf_configdir_api}/certs/sp.pfx:/netrisk/sp.pfx",
       "${conf_logsdir_api}:/var/log/netrisk",
+      "${conf_homedir_api_plugins}:/netrisk/Plugins",
     ]
 
     dockerapp::run { $api_service_name:
