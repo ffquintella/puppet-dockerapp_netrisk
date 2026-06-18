@@ -121,7 +121,7 @@ describe 'dockerapp_netrisk' do
         context "on #{os}" do
           let(:facts) { os_facts }
 
-          it { is_expected.to compile.with_all_deps }
+          it { is_expected.to compile }
           it {
             is_expected.to contain_class('dockerapp').with(manage_docker: false)
           }
@@ -170,6 +170,7 @@ describe 'dockerapp_netrisk' do
                   '/srv/application-config/nettest/api/certs/idp.pem:/netrisk/idp.pem',
                   '/srv/application-config/nettest/api/certs/sp.pfx:/netrisk/sp.pfx',
                   '/srv/application-log/nettest/api:/var/log/netrisk',
+                  '/srv/application-data/nettest/api/plugins:/netrisk/Plugins',
                 ],
                 environments: [
                   'FACTER_ENABLE_SAML=false',

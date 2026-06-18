@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 1.1.3
+
+**Changed**
+Migrate module tooling from PDK to Regent (removed pdk.yaml/.sync.yml/Gemfile/binstubs, added AGENTS.md, regent-based Rakefile and dev docs).
+
+
 ## Release 0.6.1
 
 **Features**

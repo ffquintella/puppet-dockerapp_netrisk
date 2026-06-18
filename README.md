@@ -31,7 +31,27 @@ Just call the class and pass the parameters.
 
 ## Usage
 
+Just call the class and pass the parameters. See `manifests/init.pp` for the
+full list of parameters and their documentation.
 
+## Limitations
 
+See `metadata.json` for the supported operating systems.
 
+## Development
+
+This module is developed and tested with
+[Regent](https://github.com/felipe-quintella/regent), a self-contained,
+Rust-based PDK alternative with an embedded Ruby runner. PDK and a host Ruby /
+Bundler toolchain are **not** required.
+
+```sh
+regent bootstrap   # one-time: install the gems Regent needs
+regent fixtures    # install the modules declared in .fixtures.yml
+regent validate    # parse manifests + metadata.json, lint
+regent test        # run the rspec-puppet specs
+regent build       # produce a Forge-ready tarball in pkg/
+```
+
+See [AGENTS.md](AGENTS.md) for the full contributor / agent workflow.
 
