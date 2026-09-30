@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 1.2.0
+
+**Bugfixes**
+Persist the application data directory. `/var/netrisk` was not a volume, so every
+time a container was recreated — an image bump, a `docker rm`, a host rebuild —
+the credential encryption key was discarded and every stored integration
+credential (Slack/Teams webhooks, Jira and Azure DevOps tokens, Trend Micro and
+SecurityScorecard API keys, OIDC client secrets, FaceID templates) had to be
+re-entered. The api, console and backgroundjobs containers now bind-mount a
+per-service `appdata` directory (mode `0700`) at `/var/netrisk`.
+
+**Features**
+New optional `secret_master_key` parameter. When set it is passed to the api,
+console and backgroundjobs containers as `FACTER_SECRET_MASTER_KEY`, so the key
+can come from Hiera (eyaml) or a vault instead of being host state. It must be
+the base64 encoding of 32 bytes (`openssl rand -base64 32`) and is rejected at
+compile time otherwise.
+
+
 ## Release 1.1.3
 
 **Changed**

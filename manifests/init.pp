@@ -85,6 +85,13 @@
 # @param uid
 #   The uid of the user used ot run the processes
 #
+# @param secret_master_key
+#   The master key used by the application to encrypt stored integration
+#   credentials (webhooks, api tokens, oidc secrets, biometric templates).
+#   It must be the base64 encoding of 32 random bytes, which you can generate
+#   with `openssl rand -base64 32`. When left undef the host generates its own
+#   key and persists it on the application data volume mounted at /var/netrisk.
+#
 # @example
 #   include dockerapp_netrisk
 class dockerapp_netrisk (
@@ -123,6 +130,7 @@ class dockerapp_netrisk (
   String $idp_certificate = '',
   String $sp_certificate_file = '',
   String $sp_certificate_pwd = '',
+  Optional[String[1]] $secret_master_key = undef,
 ) {
   include dockerapp::params
   include dockerapp::basedirs
@@ -153,7 +161,11 @@ class dockerapp_netrisk (
   $conf_homedir_website = "${base_app_home}/${service_name}/website"
   $conf_homedir_api = "${base_app_home}/${service_name}/api"
   $conf_homedir_api_plugins = "${conf_homedir_api}/plugins"
+  $conf_homedir_api_appdata = "${conf_homedir_api}/appdata"
+  $conf_homedir_console = "${base_app_home}/${service_name}/console"
+  $conf_homedir_console_appdata = "${conf_homedir_console}/appdata"
   $conf_homedir_backgroundjobs = "${base_app_home}/${service_name}/backgroundjobs"
+  $conf_homedir_backgroundjobs_appdata = "${conf_homedir_backgroundjobs}/appdata"
   $conf_configdir = "${base_app_config}/${service_name}"
   $conf_configdir_website = "${base_app_config}/${service_name}/website"
   $conf_configdir_api = "${base_app_config}/${service_name}/api"
@@ -215,11 +227,42 @@ class dockerapp_netrisk (
       require => [File[$conf_homedir_api],User[$user]],
     }
   }
+  if ! defined(File[$conf_homedir_api_appdata]) {
+    file { $conf_homedir_api_appdata:
+      ensure  => directory,
+      owner   => $user,
+      mode    => '0700',
+      require => [File[$conf_homedir_api],User[$user]],
+    }
+  }
+  if ! defined(File[$conf_homedir_console]) {
+    file { $conf_homedir_console:
+      ensure  => directory,
+      owner   => $user,
+      require => [File[$conf_homedir],User[$user]],
+    }
+  }
+  if ! defined(File[$conf_homedir_console_appdata]) {
+    file { $conf_homedir_console_appdata:
+      ensure  => directory,
+      owner   => $user,
+      mode    => '0700',
+      require => [File[$conf_homedir_console],User[$user]],
+    }
+  }
   if ! defined(File[$conf_homedir_backgroundjobs]) {
     file { $conf_homedir_backgroundjobs:
       ensure  => directory,
       owner   => $user,
       require => [File[$conf_homedir],User[$user]],
+    }
+  }
+  if ! defined(File[$conf_homedir_backgroundjobs_appdata]) {
+    file { $conf_homedir_backgroundjobs_appdata:
+      ensure  => directory,
+      owner   => $user,
+      mode    => '0700',
+      require => [File[$conf_homedir_backgroundjobs],User[$user]],
     }
   }
 
@@ -313,8 +356,20 @@ class dockerapp_netrisk (
   if $website_ssl_cert_file == '-' { fail('website_ssl_cert_file is mandatory') }
   if $website_ssl_cert_pwd == '-' { fail('website_ssl_cert_pwd is mandatory') }
 
+  # The master key encrypts every stored integration credential. A key of the
+  # wrong length is only noticed once the application refuses to decrypt them,
+  # so reject it here instead of passing it through to the container.
+  if $secret_master_key =~ NotUndef {
+    if $secret_master_key !~ /\A[A-Za-z0-9+\/]{43}=?\z/ {
+      fail("secret_master_key must be the base64 encoding of exactly 32 bytes; generate one with 'openssl rand -base64 32'")
+    }
+    $master_key_env = ["FACTER_SECRET_MASTER_KEY=${secret_master_key}"]
+  } else {
+    $master_key_env = []
+  }
+
   #API CONFIGS
-  $envs_api = [
+  $base_envs_api = [
     "FACTER_ENABLE_SAML=${enable_saml}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
@@ -342,6 +397,8 @@ class dockerapp_netrisk (
     'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
   ]
+
+  $envs_api = $base_envs_api + $master_key_env
 
   file { "${conf_configdir_api}/certs":
     ensure  => directory,
@@ -377,6 +434,7 @@ class dockerapp_netrisk (
       "${conf_configdir_api}/certs/sp.pfx:/netrisk/sp.pfx",
       "${conf_logsdir_api}:/var/log/netrisk",
       "${conf_homedir_api_plugins}:/netrisk/Plugins",
+      "${conf_homedir_api_appdata}:/var/netrisk",
     ]
 
     dockerapp::run { $api_service_name:
@@ -441,7 +499,7 @@ class dockerapp_netrisk (
     }
   }
 
-  $envs_console = [
+  $base_envs_console = [
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
@@ -452,12 +510,15 @@ class dockerapp_netrisk (
     "FACTER_NETRISK_UID=${uid}",
   ]
 
+  $envs_console = $base_envs_console + $master_key_env
+
   if $enable_console == true {
     $console_service_name = "${service_name}_console"
 
     $volumes_console = [
       "${conf_homedir_backups}:/backups",
       "${conf_logsdir_console}:/var/log/netrisk",
+      "${conf_homedir_console_appdata}:/var/netrisk",
     ]
 
     file { '/usr/local/bin/netrisk-console':
@@ -476,7 +537,7 @@ class dockerapp_netrisk (
     }
   }
 
-  $envs_backgroundjobs = [
+  $base_envs_backgroundjobs = [
     "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
@@ -488,12 +549,15 @@ class dockerapp_netrisk (
     "FACTER_NETRISK_UID=${uid}",
   ]
 
+  $envs_backgroundjobs = $base_envs_backgroundjobs + $master_key_env
+
   if $enable_backgroundjobs == true {
     $backgroundjobs_service_name = "${service_name}_backgroundjobs"
 
     $volumes_backgroundjobs = [
       "${conf_homedir_backups}:/backups",
       "${conf_logsdir_backgroundjobs}:/var/log/netrisk",
+      "${conf_homedir_backgroundjobs_appdata}:/var/netrisk",
     ]
 
     dockerapp::run { $backgroundjobs_service_name:
