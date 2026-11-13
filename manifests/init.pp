@@ -43,11 +43,19 @@
 # @param api_ssl_cert_file
 #   The certificate file path
 #
+# @param api_ssl_cert_base64
+#   Base64 content of the API PFX. When set it is decoded and written to the
+#   certs dir, and api_ssl_cert_file is no longer required.
+#
 # @param api_ssl_cert_pwd
 #   The password of the ssl file
 #
 # @param website_ssl_cert_file
 #   The certificate file path for the website 
+#
+# @param website_ssl_cert_base64
+#   Base64 content of the website PFX. When set it is decoded and written to
+#   the certs dir, and website_ssl_cert_file is no longer required.
 #
 # @param website_ssl_cert_pwd
 #   The password of the ssl file fro the website
@@ -109,8 +117,10 @@ class dockerapp_netrisk (
   String  $db_user = 'netrisk',
   String $db_password = '-',
   String $api_ssl_cert_file = '-',
+  Optional[String] $api_ssl_cert_base64 = undef,
   String $api_ssl_cert_pwd = '-',
   String $website_ssl_cert_file = '-',
+  Optional[String] $website_ssl_cert_base64 = undef,
   String $website_ssl_cert_pwd = '-',
   String $logging = 'Information',
   String $email_from = 'netrisk@mail.com',
@@ -129,6 +139,7 @@ class dockerapp_netrisk (
   String $idp_artifact_resolve_srvc = '',
   String $idp_certificate = '',
   String $sp_certificate_file = '',
+  Optional[String] $sp_certificate_base64 = undef,
   String $sp_certificate_pwd = '',
   Optional[String[1]] $secret_master_key = undef,
 ) {
@@ -351,9 +362,9 @@ class dockerapp_netrisk (
 
   if $db_server == '-' { fail('db_server cannot be empty') }
   if $db_password == '-' { fail('db_password is mandatory') }
-  if $api_ssl_cert_file == '-' { fail('api_ssl_cert_file is mandatory') }
+  if $api_ssl_cert_file == '-' and $api_ssl_cert_base64 == undef { fail('api_ssl_cert_file is mandatory') }
   if $api_ssl_cert_pwd == '-' { fail('api_ssl_cert_pwd is mandatory') }
-  if $website_ssl_cert_file == '-' { fail('website_ssl_cert_file is mandatory') }
+  if $website_ssl_cert_file == '-' and $website_ssl_cert_base64 == undef { fail('website_ssl_cert_file is mandatory') }
   if $website_ssl_cert_pwd == '-' { fail('website_ssl_cert_pwd is mandatory') }
 
   # The master key encrypts every stored integration credential. A key of the
@@ -405,8 +416,9 @@ class dockerapp_netrisk (
     require => File[$conf_configdir_api],
   }
   -> file { "${conf_configdir_api}/certs/api.pfx":
-    ensure => file,
-    source => $api_ssl_cert_file,
+    ensure  => file,
+    source  => $api_ssl_cert_base64 ? { undef => $api_ssl_cert_file, default => undef },
+    content => $api_ssl_cert_base64 ? { undef => undef, default => Binary($api_ssl_cert_base64, '%b') },
   }
   file { "${conf_configdir_api}/certs/idp.pem":
     ensure  => file,
@@ -415,7 +427,8 @@ class dockerapp_netrisk (
   }
   file { "${conf_configdir_api}/certs/sp.pfx":
     ensure  => file,
-    source  => $sp_certificate_file,
+    source  => $sp_certificate_base64 ? { undef => $sp_certificate_file, default => undef },
+    content => $sp_certificate_base64 ? { undef => undef, default => Binary($sp_certificate_base64, '%b') },
     require => File["${conf_configdir_api}/certs"],
   }
 
@@ -454,8 +467,9 @@ class dockerapp_netrisk (
     require => File[$conf_configdir_website],
   }
   -> file { "${conf_configdir_website}/certs/website.pfx":
-    ensure => file,
-    source => $website_ssl_cert_file,
+    ensure  => file,
+    source  => $website_ssl_cert_base64 ? { undef => $website_ssl_cert_file, default => undef },
+    content => $website_ssl_cert_base64 ? { undef => undef, default => Binary($website_ssl_cert_base64, '%b') },
   }
 
   $envs_website = [

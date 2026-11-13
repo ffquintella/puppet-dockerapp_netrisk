@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 1.3.0
+
+**Features**
+New optional `api_ssl_cert_base64`, `website_ssl_cert_base64` and
+`sp_certificate_base64` parameters. When set, the PFX is decoded from the
+base64 value (e.g. straight from Hiera) and written to the certs directory, so
+the certificate no longer has to be staged on the node beforehand. The
+`*_cert_file` parameters are still used when no base64 value is given.
+
 ## Release 1.2.0
 
 **Bugfixes**
