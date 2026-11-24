@@ -115,13 +115,13 @@ class dockerapp_netrisk (
   Integer $db_port = 3306,
   String  $db_schema = 'netrisk',
   String  $db_user = 'netrisk',
-  String $db_password = '-',
+  Sensitive[String] $db_password = Sensitive('-'),
   String $api_ssl_cert_file = '-',
   Optional[String] $api_ssl_cert_base64 = undef,
-  String $api_ssl_cert_pwd = '-',
+  Sensitive[String] $api_ssl_cert_pwd = Sensitive('-'),
   String $website_ssl_cert_file = '-',
   Optional[String] $website_ssl_cert_base64 = undef,
-  String $website_ssl_cert_pwd = '-',
+  Sensitive[String] $website_ssl_cert_pwd = Sensitive('-'),
   String $logging = 'Information',
   String $email_from = 'netrisk@mail.com',
   String $email_server = 'localhost',
@@ -140,8 +140,8 @@ class dockerapp_netrisk (
   String $idp_certificate = '',
   String $sp_certificate_file = '',
   Optional[String] $sp_certificate_base64 = undef,
-  String $sp_certificate_pwd = '',
-  Optional[String[1]] $secret_master_key = undef,
+  Sensitive[String] $sp_certificate_pwd = Sensitive(''),
+  Optional[Sensitive[String[1]]] $secret_master_key = undef,
 ) {
   include dockerapp::params
   include dockerapp::basedirs
@@ -361,20 +361,21 @@ class dockerapp_netrisk (
   }
 
   if $db_server == '-' { fail('db_server cannot be empty') }
-  if $db_password == '-' { fail('db_password is mandatory') }
+  if $db_password.unwrap == '-' { fail('db_password is mandatory') }
   if $api_ssl_cert_file == '-' and $api_ssl_cert_base64 == undef { fail('api_ssl_cert_file is mandatory') }
-  if $api_ssl_cert_pwd == '-' { fail('api_ssl_cert_pwd is mandatory') }
+  if $api_ssl_cert_pwd.unwrap == '-' { fail('api_ssl_cert_pwd is mandatory') }
   if $website_ssl_cert_file == '-' and $website_ssl_cert_base64 == undef { fail('website_ssl_cert_file is mandatory') }
-  if $website_ssl_cert_pwd == '-' { fail('website_ssl_cert_pwd is mandatory') }
+  if $website_ssl_cert_pwd.unwrap == '-' { fail('website_ssl_cert_pwd is mandatory') }
 
   # The master key encrypts every stored integration credential. A key of the
   # wrong length is only noticed once the application refuses to decrypt them,
   # so reject it here instead of passing it through to the container.
   if $secret_master_key =~ NotUndef {
-    if $secret_master_key !~ /\A[A-Za-z0-9+\/]{43}=?\z/ {
+    $master_key_plain = $secret_master_key.unwrap
+    if $master_key_plain !~ /\A[A-Za-z0-9+\/]{43}=?\z/ {
       fail("secret_master_key must be the base64 encoding of exactly 32 bytes; generate one with 'openssl rand -base64 32'")
     }
-    $master_key_env = ["FACTER_SECRET_MASTER_KEY=${secret_master_key}"]
+    $master_key_env = ["FACTER_SECRET_MASTER_KEY=${master_key_plain}"]
   } else {
     $master_key_env = []
   }
@@ -385,7 +386,7 @@ class dockerapp_netrisk (
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
-    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBPASSWORD=${db_password.unwrap}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
@@ -393,7 +394,7 @@ class dockerapp_netrisk (
     "FACTER_EMAIL_SERVER=${email_server}",
     "FACTER_EMAIL_PORT=${email_port}",
     'FACTER_SERVER_CERTIFICATE_FILE=/netrisk/api.pfx',
-    "FACTER_SERVER_CERTIFICATE_PWD=${api_ssl_cert_pwd}",
+    "FACTER_SERVER_CERTIFICATE_PWD=${api_ssl_cert_pwd.unwrap}",
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
@@ -406,7 +407,7 @@ class dockerapp_netrisk (
     "FACTER_IDP_ARTIFACT_RESOLVE_SRVC=${idp_artifact_resolve_srvc}",
     'FACTER_IDP_CERTIFICATE_FILE=/netrisk/idp.pem',
     'FACTER_SP_CERTIFICATE_FILE=/netrisk/sp.pfx',
-    "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd}",
+    "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd.unwrap}",
   ]
 
   $envs_api = $base_envs_api + $master_key_env
@@ -476,7 +477,7 @@ class dockerapp_netrisk (
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
-    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBPASSWORD=${db_password.unwrap}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_NETRISK_URL=${api_protocol}://${api_server}:${api_port}",
     "FACTER_SERVER_LOGGING=${logging}",
@@ -484,7 +485,7 @@ class dockerapp_netrisk (
     "FACTER_EMAIL_SERVER=${email_server}",
     "FACTER_EMAIL_PORT=${email_port}",
     'FACTER_SERVER_CERTIFICATE_FILE=/netrisk/website.pfx',
-    "FACTER_SERVER_CERTIFICATE_PWD=${website_ssl_cert_pwd}",
+    "FACTER_SERVER_CERTIFICATE_PWD=${website_ssl_cert_pwd.unwrap}",
     "FACTER_WEBSITE_PROTOCOL=${website_protocol}",
     "FACTER_WEBSITE_HOST=${website_server}",
     "FACTER_WEBSITE_PORT=${website_port}",
@@ -517,7 +518,7 @@ class dockerapp_netrisk (
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
-    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBPASSWORD=${db_password.unwrap}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_NETRISK_USER=${user}",
@@ -556,7 +557,7 @@ class dockerapp_netrisk (
     "FACTER_DBSERVER=${db_server}",
     "FACTER_DBUSER=${db_user}",
     "FACTER_DBPORT=${db_port}",
-    "FACTER_DBPASSWORD=${db_password}",
+    "FACTER_DBPASSWORD=${db_password.unwrap}",
     "FACTER_DBSCHEMA=${db_schema}",
     "FACTER_SERVER_LOGGING=${logging}",
     "FACTER_NETRISK_USER=${user}",

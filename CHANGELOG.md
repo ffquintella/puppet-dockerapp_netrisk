@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 1.4.0
+
+**Breaking change**
+`db_password`, `api_ssl_cert_pwd`, `website_ssl_cert_pwd`, `sp_certificate_pwd`
+and `secret_master_key` are now `Sensitive` (`Sensitive[String]`, and
+`Optional[Sensitive[String[1]]]` for `secret_master_key`), so they are redacted
+in logs and reports. Plain strings are no longer accepted: wrap the values in
+Hiera with `lookup_options` / `convert_to: Sensitive`, or pass `Sensitive(...)`.
+
 ## Release 1.3.0
 
 **Features**

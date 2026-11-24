@@ -46,7 +46,7 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
         }
       end
 
@@ -59,7 +59,7 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
         }
       end
@@ -73,9 +73,9 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
         }
       end
 
@@ -88,9 +88,9 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
           website_ssl_cert_file: '/ws_sslfile.pfx',
         }
       end
@@ -104,14 +104,14 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
           idp_certificate: '/api.pem',
           sp_certificate_file: '/sp.pfx',
-          sp_certificate_pwd: '123',
+          sp_certificate_pwd: sensitive('123'),
           website_ssl_cert_file: '/ws_sslfile.pfx',
-          website_ssl_cert_pwd: '1234',
+          website_ssl_cert_pwd: sensitive('1234'),
           enable_saml: false
 
         }
@@ -314,16 +314,16 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
           idp_certificate: '/api.pem',
           sp_certificate_file: '/sp.pfx',
-          sp_certificate_pwd: '123',
+          sp_certificate_pwd: sensitive('123'),
           website_ssl_cert_file: '/ws_sslfile.pfx',
-          website_ssl_cert_pwd: '1234',
+          website_ssl_cert_pwd: sensitive('1234'),
           enable_saml: false,
-          secret_master_key: 'Yy8OaM3jVQKDe+gRZtnGdS1rWpXlHu7cIbA4FkNPqT0=',
+          secret_master_key: sensitive('Yy8OaM3jVQKDe+gRZtnGdS1rWpXlHu7cIbA4FkNPqT0='),
         }
       end
 
@@ -435,12 +435,12 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
           website_ssl_cert_file: '/ws_sslfile.pfx',
-          website_ssl_cert_pwd: '1234',
-          secret_master_key: 'not a base64 key at all!!!!!!!!!!!!!!!!!!!!!',
+          website_ssl_cert_pwd: sensitive('1234'),
+          secret_master_key: sensitive('not a base64 key at all!!!!!!!!!!!!!!!!!!!!!'),
         }
       end
 
@@ -453,12 +453,12 @@ describe 'dockerapp_netrisk' do
           service_name: 'nettest',
           version: '1.4.1',
           db_server: 'testedb',
-          db_password: 'testepwd',
+          db_password: sensitive('testepwd'),
           api_ssl_cert_file: '/sslfile.pfx',
-          api_ssl_cert_pwd: '123',
+          api_ssl_cert_pwd: sensitive('123'),
           website_ssl_cert_file: '/ws_sslfile.pfx',
-          website_ssl_cert_pwd: '1234',
-          secret_master_key: 'c2hvcnRrZXk=',
+          website_ssl_cert_pwd: sensitive('1234'),
+          secret_master_key: sensitive('c2hvcnRrZXk='),
         }
       end
 
