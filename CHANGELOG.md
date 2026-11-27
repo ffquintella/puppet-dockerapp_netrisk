@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 1.5.0
+
+**Features**
+FerroGate MIA (Machine Identity Agent) support for the `api` and
+`backgroundjobs` containers, which carry the client from image version 2.50.0
+(console and website never get it). New parameters: `mia_mode` (`off` default,
+`auto`, `embedded`, `host`), `mia_required`, `mia_cmis_endpoint`,
+`mia_cmis_srv`, `mia_cmis_spki_pin`, `mia_allowlist_key`, `mia_env`,
+`mia_config_source` / `mia_config_content`, `mia_state_mode`,
+`mia_state_volume`, `mia_state_dir` and `mia_host_socket_dir`. Embedded and auto
+always mount the machine identity at `/var/lib/ferrogate` (named volume or host
+directory); host mode mounts the socket directory at `/run/ferrogate-host:ro`.
+Invalid combinations and `version` < 2.50.0 fail at compile time. With the
+default `mia_mode: off` the catalog is unchanged. See the README.
+
 ## Release 1.4.0
 
 **Breaking change**

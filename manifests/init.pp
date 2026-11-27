@@ -100,6 +100,67 @@
 #   with `openssl rand -base64 32`. When left undef the host generates its own
 #   key and persists it on the application data volume mounted at /var/netrisk.
 #
+# @param mia_mode
+#   FerroGate MIA (Machine Identity Agent) mode for the api and backgroundjobs
+#   containers (never console or website). 'off' (default) leaves the
+#   containers exactly as before. 'embedded' runs an agent inside the container
+#   with its own identity; 'host' uses the MIA of the Docker host through its
+#   socket; 'auto' lets the image entrypoint choose (host if the socket is
+#   mounted, else embedded if a CMIS endpoint exists, else off). Anything other
+#   than 'off' needs version >= 2.50.0 (or 'latest'). Because the socket mount
+#   is only added for 'host', use 'host' explicitly to reach the host MIA.
+#
+# @param mia_required
+#   When true the container aborts if the agent or socket is unavailable
+#   (MIA_REQUIRED=1).
+#
+# @param mia_cmis_endpoint
+#   FERROGATE_CMIS_ENDPOINT. Embedded/auto need this, mia_cmis_srv or a mia.toml.
+#
+# @param mia_cmis_srv
+#   FERROGATE_CMIS_SRV, a DNS SRV name used to discover the CMIS.
+#
+# @param mia_cmis_spki_pin
+#   FERROGATE_CMIS_SPKI_PIN. The pin is not a secret.
+#
+# @param mia_allowlist_key
+#   FERROGATE_ALLOWLIST_KEY.
+#
+# @param mia_env
+#   Any other FERROGATE_* variable to hand to the agent as is. Values may be
+#   Sensitive. Like every container environment variable they are visible in
+#   `docker inspect` (the same exposure as db_password), so keep real
+#   credentials out of it. The keys that have a dedicated parameter are
+#   rejected here.
+#
+# @param mia_config_source
+#   Puppet file source (e.g. a path on the node or a puppet:/// URL) of a
+#   mia.toml. It is written to a host directory and mounted read-only at
+#   /etc/ferrogate/mia.toml. Mutually exclusive with mia_config_content.
+#
+# @param mia_config_content
+#   Content of the mia.toml, as an alternative to mia_config_source.
+#
+# @param mia_state_mode
+#   Where the machine identity (/var/lib/ferrogate) lives: 'volume' (default,
+#   a named Docker volume) or 'directory' (a bind mount of mia_state_dir).
+#   Each container gets its own identity, so the volume or directory name gets
+#   an -api / -backgroundjobs (or /api, /backgroundjobs) suffix. Always mounted
+#   when the mode is embedded or auto.
+#
+# @param mia_state_volume
+#   Base name of the identity volumes. Defaults to "<service_name>-mia".
+#
+# @param mia_state_dir
+#   Host directory holding the identity when mia_state_mode is 'directory'.
+#   Required in that case. Subdirectories are created mode 0700; the image
+#   entrypoint chowns them to the agent account, so the owner is not managed.
+#
+# @param mia_host_socket_dir
+#   Host directory with the MIA socket, mounted read-only at
+#   /run/ferrogate-host in 'host' mode. It is the directory, not the socket,
+#   that is mounted, because the host MIA recreates the socket on restart.
+#
 # @example
 #   include dockerapp_netrisk
 class dockerapp_netrisk (
@@ -142,6 +203,19 @@ class dockerapp_netrisk (
   Optional[String] $sp_certificate_base64 = undef,
   Sensitive[String] $sp_certificate_pwd = Sensitive(''),
   Optional[Sensitive[String[1]]] $secret_master_key = undef,
+  Enum['auto','embedded','host','off'] $mia_mode = 'off',
+  Boolean $mia_required = false,
+  Optional[String[1]] $mia_cmis_endpoint = undef,
+  Optional[String[1]] $mia_cmis_srv = undef,
+  Optional[String[1]] $mia_cmis_spki_pin = undef,
+  Optional[String[1]] $mia_allowlist_key = undef,
+  Hash[String, Variant[String, Sensitive[String]]] $mia_env = {},
+  Optional[String[1]] $mia_config_source = undef,
+  Optional[String[1]] $mia_config_content = undef,
+  Enum['volume','directory'] $mia_state_mode = 'volume',
+  Optional[String[1]] $mia_state_volume = undef,
+  Optional[String[1]] $mia_state_dir = undef,
+  String $mia_host_socket_dir = '/run/ferrogate',
 ) {
   include dockerapp::params
   include dockerapp::basedirs
@@ -380,6 +454,176 @@ class dockerapp_netrisk (
     $master_key_env = []
   }
 
+  # FerroGate MIA (api and backgroundjobs only). With mia_mode 'off' nothing
+  # below adds a volume, a variable or a resource.
+  $mia_enabled = $mia_mode != 'off'
+  $mia_has_config = $mia_config_source =~ NotUndef or $mia_config_content =~ NotUndef
+  $mia_embedded = $mia_mode in ['embedded', 'auto']
+  $mia_host = $mia_mode == 'host'
+  $mia_dedicated_keys = ['FERROGATE_CMIS_ENDPOINT', 'FERROGATE_CMIS_SRV', 'FERROGATE_CMIS_SPKI_PIN', 'FERROGATE_ALLOWLIST_KEY']
+  $conf_configdir_mia = "${conf_configdir}/mia"
+  $mia_state_volume_base = $mia_state_volume ? { undef => "${service_name}-mia", default => $mia_state_volume }
+
+  if $mia_config_source =~ NotUndef and $mia_config_content =~ NotUndef {
+    fail('mia_config_source and mia_config_content are mutually exclusive')
+  }
+  $mia_env.each |$key, $value| {
+    if $key !~ /\AFERROGATE_[A-Z0-9_]+\z/ {
+      fail("mia_env key '${key}' must look like FERROGATE_*")
+    }
+    if $key in $mia_dedicated_keys {
+      fail("mia_env key '${key}' has a dedicated parameter; use that instead")
+    }
+  }
+
+  if $mia_enabled {
+    if $version != 'latest' {
+      # Pure regex on purpose: too old is 0.x, 1.x and 2.0 to 2.49.
+      if $version !~ /\Av?\d+\.\d+/ {
+        fail("mia_mode '${mia_mode}' needs an image version >= 2.50.0, but version '${version}' cannot be compared; use a numeric tag or 'latest'")
+      }
+      if $version =~ /\Av?(?:[01]\.\d+|2\.(?:\d|[1-4]\d)(?:[.+-]|\z))/ {
+        fail("mia_mode '${mia_mode}' needs version >= 2.50.0, the first image with the FerroGate MIA client (got '${version}')")
+      }
+    }
+    if $mia_embedded and $mia_cmis_endpoint =~ Undef and $mia_cmis_srv =~ Undef and !$mia_has_config {
+      fail("mia_mode '${mia_mode}' needs mia_cmis_endpoint, mia_cmis_srv or a mia.toml (mia_config_source / mia_config_content)")
+    }
+    if $mia_host and $mia_host_socket_dir !~ /\A\/.+/ {
+      fail("mia_mode 'host' needs mia_host_socket_dir set to the absolute path of the host MIA socket directory")
+    }
+    if $mia_state_mode == 'directory' and $mia_state_dir =~ Undef {
+      fail("mia_state_mode 'directory' needs mia_state_dir")
+    }
+  }
+
+  if $mia_enabled {
+    $mia_required_flag = $mia_required ? { true => '1', default => '0' }
+    $mia_dedicated_env = [
+      $mia_cmis_endpoint ? { undef => [], default => ["FERROGATE_CMIS_ENDPOINT=${mia_cmis_endpoint}"] },
+      $mia_cmis_srv ? { undef => [], default => ["FERROGATE_CMIS_SRV=${mia_cmis_srv}"] },
+      $mia_cmis_spki_pin ? { undef => [], default => ["FERROGATE_CMIS_SPKI_PIN=${mia_cmis_spki_pin}"] },
+      $mia_allowlist_key ? { undef => [], default => ["FERROGATE_ALLOWLIST_KEY=${mia_allowlist_key}"] },
+    ].flatten
+    $mia_extra_env = $mia_env.keys.sort.map |$key| {
+      $value = $mia_env[$key]
+      $plain = $value ? { Sensitive => $value.unwrap, default => $value }
+      "${key}=${plain}"
+    }
+    $mia_envs = ["MIA_MODE=${mia_mode}", "MIA_REQUIRED=${mia_required_flag}"] + $mia_dedicated_env + $mia_extra_env
+
+    $mia_config_volumes = $mia_has_config ? {
+      true    => ["${conf_configdir_mia}/mia.toml:/etc/ferrogate/mia.toml:ro"],
+      default => [],
+    }
+    $mia_socket_volumes = $mia_host ? {
+      true    => ["${mia_host_socket_dir}:/run/ferrogate-host:ro"],
+      default => [],
+    }
+    # The identity mount is what keeps the host key across container
+    # recreation; the entrypoint refuses to start an embedded agent without it.
+    if $mia_embedded {
+      $mia_state_name_api = $mia_state_mode ? {
+        'directory' => "${mia_state_dir}/api",
+        default     => "${mia_state_volume_base}-api",
+      }
+      $mia_state_name_backgroundjobs = $mia_state_mode ? {
+        'directory' => "${mia_state_dir}/backgroundjobs",
+        default     => "${mia_state_volume_base}-backgroundjobs",
+      }
+      $mia_state_volumes_api = ["${mia_state_name_api}:/var/lib/ferrogate"]
+      $mia_state_volumes_backgroundjobs = ["${mia_state_name_backgroundjobs}:/var/lib/ferrogate"]
+    } else {
+      $mia_state_volumes_api = []
+      $mia_state_volumes_backgroundjobs = []
+    }
+
+    if $mia_has_config and ($enable_api or $enable_backgroundjobs) {
+      file { $conf_configdir_mia:
+        ensure  => directory,
+        require => File[$conf_configdir],
+      }
+      file { "${conf_configdir_mia}/mia.toml":
+        ensure  => file,
+        mode    => '0644',
+        source  => $mia_config_source,
+        content => $mia_config_content,
+        require => File[$conf_configdir_mia],
+      }
+    }
+
+    if $mia_embedded and ($enable_api or $enable_backgroundjobs) {
+      if $mia_state_mode == 'directory' {
+        if ! defined(File[$mia_state_dir]) {
+          file { $mia_state_dir:
+            ensure => directory,
+            mode   => '0700',
+          }
+        }
+        if $enable_api {
+          file { $mia_state_name_api:
+            ensure  => directory,
+            mode    => '0700',
+            require => File[$mia_state_dir],
+          }
+        }
+        if $enable_backgroundjobs {
+          file { $mia_state_name_backgroundjobs:
+            ensure  => directory,
+            mode    => '0700',
+            require => File[$mia_state_dir],
+          }
+        }
+      } else {
+        if $enable_api {
+          docker_volume { $mia_state_name_api:
+            ensure => present,
+          }
+        }
+        if $enable_backgroundjobs {
+          docker_volume { $mia_state_name_backgroundjobs:
+            ensure => present,
+          }
+        }
+      }
+    }
+
+    $mia_state_require_api = $mia_embedded ? {
+      true    => $mia_state_mode ? {
+        'directory' => [File[$mia_state_name_api]],
+        default     => [Docker_volume[$mia_state_name_api]],
+      },
+      default => [],
+    }
+    $mia_state_require_backgroundjobs = $mia_embedded ? {
+      true    => $mia_state_mode ? {
+        'directory' => [File[$mia_state_name_backgroundjobs]],
+        default     => [Docker_volume[$mia_state_name_backgroundjobs]],
+      },
+      default => [],
+    }
+    $mia_config_require = $mia_has_config ? {
+      true    => [File["${conf_configdir_mia}/mia.toml"]],
+      default => [],
+    }
+  } else {
+    $mia_state_require_api = []
+    $mia_state_require_backgroundjobs = []
+    $mia_config_require = []
+    $mia_envs = []
+    $mia_config_volumes = []
+    $mia_socket_volumes = []
+    $mia_state_volumes_api = []
+    $mia_state_volumes_backgroundjobs = []
+  }
+
+  # Left undef (not []) when MIA is off, so the resource is untouched.
+  $mia_requires_backgroundjobs_list = $mia_config_require + $mia_state_require_backgroundjobs
+  $mia_requires_backgroundjobs = $mia_requires_backgroundjobs_list.empty ? {
+    true    => undef,
+    default => $mia_requires_backgroundjobs_list,
+  }
+
   #API CONFIGS
   $base_envs_api = [
     "FACTER_ENABLE_SAML=${enable_saml}",
@@ -410,7 +654,7 @@ class dockerapp_netrisk (
     "FACTER_SP_CERTIFICATE_PWD=${sp_certificate_pwd.unwrap}",
   ]
 
-  $envs_api = $base_envs_api + $master_key_env
+  $envs_api = $base_envs_api + $master_key_env + $mia_envs
 
   file { "${conf_configdir_api}/certs":
     ensure  => directory,
@@ -449,7 +693,7 @@ class dockerapp_netrisk (
       "${conf_logsdir_api}:/var/log/netrisk",
       "${conf_homedir_api_plugins}:/netrisk/Plugins",
       "${conf_homedir_api_appdata}:/var/netrisk",
-    ]
+    ] + $mia_config_volumes + $mia_state_volumes_api + $mia_socket_volumes
 
     dockerapp::run { $api_service_name:
       image        => $image_name_api,
@@ -457,7 +701,7 @@ class dockerapp_netrisk (
       volumes      => $volumes_api,
       environments => $envs_api,
       net          => $network_name,
-      require      => [File["${conf_configdir_api}/certs/api.pfx"]],
+      require      => [File["${conf_configdir_api}/certs/api.pfx"]] + $mia_config_require + $mia_state_require_api,
     }
   }
 
@@ -564,7 +808,7 @@ class dockerapp_netrisk (
     "FACTER_NETRISK_UID=${uid}",
   ]
 
-  $envs_backgroundjobs = $base_envs_backgroundjobs + $master_key_env
+  $envs_backgroundjobs = $base_envs_backgroundjobs + $master_key_env + $mia_envs
 
   if $enable_backgroundjobs == true {
     $backgroundjobs_service_name = "${service_name}_backgroundjobs"
@@ -573,13 +817,14 @@ class dockerapp_netrisk (
       "${conf_homedir_backups}:/backups",
       "${conf_logsdir_backgroundjobs}:/var/log/netrisk",
       "${conf_homedir_backgroundjobs_appdata}:/var/netrisk",
-    ]
+    ] + $mia_config_volumes + $mia_state_volumes_backgroundjobs + $mia_socket_volumes
 
     dockerapp::run { $backgroundjobs_service_name:
       image        => $image_name_backgroundjobs,
       environments => $envs_backgroundjobs,
       volumes      => $volumes_backgroundjobs,
       net          => $network_name,
+      require      => $mia_requires_backgroundjobs,
     }
   }
 }

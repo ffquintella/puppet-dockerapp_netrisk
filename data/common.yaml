@@ -1,1 +1,7 @@
---- {}
+---
+# FerroGate MIA is opt-in: with mia_mode 'off' the containers are unchanged.
+dockerapp_netrisk::mia_mode: 'off'
+dockerapp_netrisk::mia_required: false
+dockerapp_netrisk::mia_env: {}
+dockerapp_netrisk::mia_state_mode: 'volume'
+dockerapp_netrisk::mia_host_socket_dir: '/run/ferrogate'
